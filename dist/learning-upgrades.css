@@ -1,0 +1,114 @@
+/* Quiet additions to the existing Apple Study question column and skill views. */
+.learning-confidence{border:0;padding:0;margin:21px 0 16px;min-width:0}
+.learning-confidence legend{padding:0;margin:0 0 8px;font-size:12px;color:var(--ink);font-weight:500}
+.learning-confidence legend>span,.learning-optional{font-weight:400;color:var(--muted);font-size:10px;margin-left:5px}
+.learning-confidence-options{display:flex;flex-wrap:wrap;gap:7px}
+.learning-confidence-option{position:relative;display:block;cursor:pointer}
+.learning-confidence-option input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.learning-confidence-option>span{display:flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 15px;border:1px solid var(--line);border-radius:7px;font-size:12px;line-height:1.5;color:var(--muted);background:var(--paper)}
+.learning-confidence-option>span::before{content:"";width:10px;height:10px;flex:0 0 10px;border:1px solid var(--muted);border-radius:50%;background:transparent}
+.learning-confidence-option:hover>span{border-color:var(--muted);color:var(--ink)}
+.learning-confidence-option input:checked+span{border-color:var(--teal);background:var(--surface-teal);color:var(--teal);font-weight:600}
+.learning-confidence-option input:checked+span::before{border:3px solid var(--teal);background:var(--paper)}
+.learning-confidence-option input:focus-visible+span{outline:3px solid var(--focus);outline-offset:3px}
+.learning-confidence:disabled .learning-confidence-option{cursor:default}
+.learning-confidence:disabled .learning-confidence-option>span{opacity:.65}
+
+.learning-correction{padding:25px 32px 29px;border-top:1px solid var(--line);background:var(--paper);color:var(--ink);min-width:0}
+.learning-correction h3{font-size:18px;line-height:1.5;letter-spacing:-.35px;margin:0}
+.learning-correction-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 15px}
+.learning-result-label{font-size:10px;color:var(--muted);line-height:1.5}
+.learning-correction-complete .learning-correction-heading h3,.learning-correction-complete .learning-result-label{color:var(--success)}
+.learning-correction-note,.learning-first-answer{font-size:12px;line-height:1.8;max-width:72ch;color:var(--muted);margin:7px 0 0;overflow-wrap:anywhere}
+.learning-first-answer{font-size:11px;margin-top:9px}
+.learning-first-answer strong{font-weight:600;color:var(--ink)}
+.learning-small-hint{border-left:3px solid var(--teal);padding:11px 16px;margin:19px 0 20px;background:var(--surface-teal);border-radius:0 7px 7px 0;max-width:75ch}
+.learning-small-hint>strong{font-size:11px;font-weight:600;color:var(--teal)}
+.learning-small-hint>p{font-size:12px;line-height:1.85;color:var(--ink);margin:4px 0 0;overflow-wrap:anywhere}
+.learning-correction-form{margin:22px 0 0;max-width:75ch}
+.learning-correction-form>label,.learning-correction-fields>label{display:block;font-size:12px;font-weight:500;line-height:1.7;color:var(--ink)}
+.learning-correction-form textarea,.learning-correction-form input[type=text],.learning-correction-form select{display:block;width:100%;min-width:0;margin:7px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);font-size:13px;line-height:1.7}
+.learning-correction-form textarea{resize:vertical;min-height:78px}
+.learning-correction-form>label+label,.learning-correction-form>.learning-retry-choices,.learning-correction-form>.learning-field-note+label{margin-top:19px}
+.learning-field-note{font-size:11px;line-height:1.75;color:var(--muted);margin:7px 0 0}
+.learning-correction-fields{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:20px 0}
+.learning-retry-choices{border:0;padding:0;margin:19px 0 0;min-width:0}
+.learning-retry-choices legend{font-size:12px;font-weight:500;padding:0;margin-bottom:7px}
+.learning-retry-choices>div{display:flex;flex-wrap:wrap;gap:8px}
+.learning-retry-choices label{display:flex;align-items:center;gap:9px;cursor:pointer;border:1px solid var(--line);border-radius:7px;min-height:42px;padding:9px 14px;font-size:13px;background:var(--paper);color:var(--ink)}
+.learning-retry-choices label:has(input:checked){background:var(--surface-teal);border-color:var(--teal);color:var(--teal)}
+.learning-retry-choices input{margin:0;width:14px;height:14px;accent-color:var(--teal)}
+.learning-correction-error{font-size:12px;line-height:1.75;color:var(--danger);margin:15px 0 0}
+.learning-correction-error:empty{margin:0}
+.learning-correction-actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px 20px;margin-top:20px}
+.learning-correction-actions>.primary{font-size:12px;min-height:42px;padding:10px 15px}
+.learning-correction-actions>.text-button{min-height:40px;padding:8px 0;background:transparent;font-size:11px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;line-height:1.7}
+.learning-correction-actions>.text-button:hover{color:var(--teal)}
+.learning-worked-solution{margin:20px 0;padding-top:18px;border-top:1px solid var(--line);font-size:13px;line-height:1.85;overflow-wrap:anywhere}
+.learning-worked-solution p+p{margin-top:10px}
+.learning-worked-solution img{max-width:100%;height:auto}
+.learning-recognition{margin:18px 0;padding:12px 16px;border-left:3px solid var(--success);background:var(--success-soft);border-radius:0 7px 7px 0}
+.learning-recognition>strong{font-size:11px;font-weight:600;color:var(--success)}
+.learning-recognition>p{font-size:12px;line-height:1.85;color:var(--ink);margin-top:4px;overflow-wrap:anywhere;white-space:pre-wrap}
+
+.learning-retention,.learning-calibration{border-top:1px solid var(--line);padding:23px 0;margin-top:23px;min-width:0}
+.learning-section-heading{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:5px 16px}
+.learning-retention h3,.learning-calibration h3{font-size:16px;line-height:1.6;letter-spacing:-.25px;margin:0}
+.learning-section-heading>span{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.learning-section-intro,.learning-empty-note{font-size:12px;line-height:1.85;color:var(--muted);margin:6px 0 0;max-width:68ch}
+.learning-empty-note{margin-top:9px}
+.learning-evidence-note{font-size:11px;line-height:1.85;color:var(--muted);margin:14px 0 0;max-width:72ch}
+.learning-evidence-note+.learning-evidence-note{margin-top:5px}
+.learning-retention-list{padding:0;margin:15px 0 0;list-style:none}
+.learning-retention-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 0;border-top:1px solid var(--line);min-width:0}
+.learning-retention-row>div{min-width:0}
+.learning-retention-row h4{font-size:13px;line-height:1.65;font-weight:600;margin:0;color:var(--ink);overflow-wrap:anywhere}
+.learning-retention-row p{font-size:10px;line-height:1.75;color:var(--muted);margin:3px 0 0}
+.learning-retention-timing{display:block;font-size:10px;line-height:1.75;color:var(--muted);margin-top:3px}
+.learning-retention-verified{color:var(--success)}
+.learning-retention-row .learning-retention-unavailable{font-size:11px;max-width:55ch;margin-top:6px}
+.learning-retention-row>.text-button{flex-shrink:0;min-height:40px;padding:9px 0;font-size:11px;background:transparent;color:var(--teal);text-decoration:underline;text-underline-offset:3px}
+.learning-calibration-table-wrap{width:100%;max-width:690px;overflow-x:auto;margin-top:15px}
+.learning-calibration-table{width:100%;border-collapse:collapse;background:transparent;font-size:12px;text-align:left;font-variant-numeric:tabular-nums}
+.learning-calibration-table th,.learning-calibration-table td{padding:11px 10px;border-top:1px solid var(--line);background:transparent;line-height:1.7}
+.learning-calibration-table thead th{font-size:10px;font-weight:400;color:var(--muted);white-space:normal}
+.learning-calibration-table tbody th{font-size:12px;font-weight:500;color:var(--ink)}
+.learning-calibration-table td{color:var(--muted)}
+.learning-calibration-table th:first-child{padding-left:0}
+.learning-calibration-table th:last-child,.learning-calibration-table td:last-child{padding-right:0;text-align:right}
+.learning-active-time{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 17px;margin-top:18px;padding-top:15px;border-top:1px solid var(--line);max-width:690px}
+.learning-active-time>span{font-size:11px;color:var(--muted)}
+.learning-active-time>strong{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.learning-active-time>strong>small{font-size:10px;font-weight:400;color:var(--muted);margin-left:3px}
+.learning-active-time>p{flex-basis:100%;font-size:10px;line-height:1.8;color:var(--muted);margin:1px 0 0;max-width:72ch}
+.learning-confidence-focus{max-width:690px;margin-top:20px}
+.learning-confidence-focus h4{font-size:12px;font-weight:600;color:var(--ink);margin:0;line-height:1.7}
+.learning-confidence-focus .learning-section-heading>a{font-size:11px;text-underline-offset:3px;min-height:40px;display:flex;align-items:center}
+.learning-confidence-focus ul{list-style:none;padding:0;margin:5px 0 0}
+.learning-confidence-focus li{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:3px 17px;padding:10px 0;border-top:1px solid var(--line);font-size:11px;line-height:1.8}
+.learning-confidence-focus li>strong{font-weight:500;color:var(--ink);overflow-wrap:anywhere}
+.learning-confidence-focus li>span{color:var(--muted)}
+
+@media(max-width:740px){
+  .learning-correction{padding:23px 24px 26px}
+  .learning-correction-heading{align-items:baseline}
+  .learning-correction-actions{gap:8px 17px}
+}
+@media(max-width:480px){
+  .learning-correction{padding:22px 18px 25px}
+  .learning-correction h3{font-size:17px}
+  .learning-confidence-option>span{padding:8px 13px;font-size:11px}
+  .learning-confidence-options{gap:6px}
+  .learning-correction-fields{grid-template-columns:1fr;gap:17px}
+  .learning-small-hint{padding:10px 13px}
+  .learning-correction-actions{gap:6px 17px}
+  .learning-correction-actions>.primary{flex:1 1 100%;text-align:center}
+  .learning-retention-row{align-items:start;gap:12px}
+  .learning-retention-row>.text-button{margin-top:-5px}
+  .learning-calibration-table th,.learning-calibration-table td{padding:10px 7px}
+  .learning-calibration-table td{font-size:11px}
+}
+@media print{
+  .learning-correction-actions,.learning-retention-row>.text-button{display:none!important}
+  .learning-correction,.learning-retention,.learning-calibration{break-inside:avoid}
+}

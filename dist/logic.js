@@ -38,7 +38,7 @@ function equivalentEquation(candidate,model){
   return ratio!==null&&Math.abs(ratio)>1e-8;
 }
 export function checkSetup(){return null;}
-export function stableSession(session){return session.completed&&session.records.length>=5&&session.records.filter(r=>r.correct&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true).length/session.records.length>=.8;}
+export function stableSession(session){return session.completed&&session.records.length>=5&&session.records.filter(r=>r.correct&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true&&!r.previouslyExposed&&r.confidence!=='guessing').length/session.records.length>=.8;}
 export function usedIds(history,sessions){return new Set([...history.map(r=>r.questionId),...sessions.flatMap(s=>s.records.map(r=>r.questionId))]);}
 export function advanceSession(session){
   if(session.completed||!session.records.some(r=>r.questionId===session.questionIds[session.index]))return false;

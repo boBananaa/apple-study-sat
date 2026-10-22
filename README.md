@@ -145,3 +145,14 @@ Do not commit an imported question bank to a public fork. The privacy check inte
 ## Contributing
 
 Run `npm test`, `python scripts/check_public_source.py`, and the Python tests before submitting changes. Use synthetic test fixtures. Keep personal study exports, screenshots, PDFs, credentials, and generated assets out of commits. The interface and study logic work without a paid service or AI API key.
+
+## Correction, confidence, and delayed checks
+
+- **Correct the reasoning:** an incorrect first answer opens a small hint and a retry with a corrected setup, an error category, and a recognition rule. The key and supplied explanation open after a correct retry or an explicit reveal. Retries remain assisted and never replace the original answer, confidence, or accuracy. Completing a correction schedules same-question review for the next day; that rework stays separate from fresh practice.
+- **Check what stuck:** practice schedules a check three calendar days later. A check uses three unused, previously unexposed Easy/Medium questions from the same section and skill. All three first answers must be correct without help or guessing and have valid approaches (model-checked where supported, otherwise self-checked) to pass. A passed check returns in seven days; a failed check returns the next day with fresh questions. No question is recycled to fill a shortage. These are app practice rules, not validated mastery or score predictions.
+- **Confidence and time:** new practice asks for Sure, Unsure, or Guessing before feedback. Progress compares first-answer accuracy, help used, and median active study time by section, with skills to revisit. Guessed correct answers keep their raw correctness but do not count toward readiness or a passed delayed check. Older unrated records remain unrated. Active time is approximate visible, focused time; it is separate from the optional stopwatch and assessment deadlines.
+- **Honest lesson completion:** completing an original lesson check means the lesson was reviewed. A miss gives a hint before an optional worked-answer reveal. The lesson alone does not certify skill mastery.
+
+Delayed checks appear under Learn and Review. Their dates are independent of the calendar routine. Merely displaying a question marks it exposed for future fresh selection, including in an assessment that is later archived. Progress backups include this exposure history, correction attempts, confidence, and delayed-check evidence. Equal-length session imports can merge correction progress while preserving first attempts.
+
+Without an imported question library, the app clearly offers bank setup instead of promising a five-question practice session. Lessons and vocabulary remain available. Both Math and Reading and Writing use the same learning evidence rules.

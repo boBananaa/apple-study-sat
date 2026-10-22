@@ -35,7 +35,7 @@ export function normalizeRoutine(input){
  if(!validDate(input.startDate)||!validDate(input.testDate)||input.testDate<=input.startDate)throw Error('Your SAT date must be after the routine start date. Update the dates to build a calendar.');
  return {scope:input.scope,minutes,days,startDate:input.startDate,testDate:input.testDate};
 }
-const independent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true;
+const independent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true&&!r.previouslyExposed&&r.confidence!=='guessing';
 export function rankSkills({section,diagnostics=[],sessions=[],questions=[]}){
  const skills=[...new Set([...SKILLS[section],...questions.filter(q=>q.section===section).map(q=>q.skill)])];
  const all=sessions.filter(s=>s.section===section).flatMap(s=>s.records||[]).filter(r=>r.setupAssessment!=='exam_answer_only');

@@ -1,11 +1,13 @@
-import {gradeAnswer} from './logic.js';
-import {localDate,addDays,validDate} from './planner.js?v=3';
+import {initializeLearning,validateLearning,mergeLearning} from './learning-logic.js?v=8';
+import {gradeAnswer} from './logic.js?v=8';
+import {localDate,addDays,validDate} from './planner.js?v=8';
 
-export const isIndependent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true;
+export const isIndependent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true&&!r.previouslyExposed&&r.confidence!=='guessing';
 export function initializeStudio(state){
  state.studio ||= {};
  const defaults={version:1,lessons:{},vocab:{},review:{},saved:[],notes:{},annotations:{},eliminated:{},exams:[],events:[],challenge:{},theme:'light',weeklyGoal:100,focus:false,scoreReports:[]};
  for(const [key,value] of Object.entries(defaults))state.studio[key]??=value;
+ initializeLearning(state.studio);
  return state.studio;
 }
 export function award(studio,key,points,kind,at=new Date().toISOString()){
@@ -28,9 +30,9 @@ export function reviewQueue(state,questions,today=localDate()){
  return [...latest].flatMap(([id,r])=>{
   const q=byId.get(id),progress=state.studio?.review?.[id];
   if(!q)return[];
-  const needs=!r.correct||r.hintsUsed>0||r.revealed||r.setupCorrect===false||state.studio?.saved?.includes(id);
+  const needs=!r.correct||r.hintsUsed>0||r.revealed||r.setupCorrect===false||r.confidence==='guessing'||state.studio?.saved?.includes(id);
   if(!needs)return[];
-  return [{question:q,record:r,progress,due:!progress?.due||progress.due<=today,reason:r.bookmarkOnly?'Saved for later':r.revealed?'Solution revealed':!r.correct?'Answer missed':r.hintsUsed?'Hint used':r.setupCorrect===false?'Setup needs work':'Saved for review'}];
+  return [{question:q,record:r,progress,due:!progress?.due||progress.due<=today,reason:r.bookmarkOnly?'Saved for later':r.revealed?'Solution revealed':!r.correct?'Answer missed':r.hintsUsed?'Hint used':r.setupCorrect===false?'Setup needs work':r.confidence==='guessing'?'Correct but guessed':'Saved for review'}];
  }).sort((a,b)=>Number(b.due)-Number(a.due)||String(a.progress?.due||'').localeCompare(String(b.progress?.due||'')));
 }
 export function recordReview(studio,id,{correct,setup,rule,errorType='Unknown',hinted=false},today=localDate()){
@@ -48,7 +50,7 @@ export function rateVocabulary(studio,id,rating,today=localDate()){
  return studio.vocab[id];
 }
 export function examTaken(state,history=[]){
- return new Set([...history.map(r=>r.questionId),...(state.sessions||[]).flatMap(s=>s.records.map(r=>r.questionId)),...(state.sessions||[]).filter(s=>!s.completed).flatMap(s=>s.questionIds),...(state.studio?.exams||[]).filter(e=>e.status!=='abandoned').flatMap(e=>e.modules.flatMap(m=>m.questionIds))]);
+ return new Set([...Object.keys(state.studio?.learning?.exposures||{}),...history.map(r=>r.questionId),...(state.sessions||[]).flatMap(s=>s.records.map(r=>r.questionId)),...(state.sessions||[]).filter(s=>!s.completed).flatMap(s=>s.questionIds),...(state.studio?.exams||[]).filter(e=>e.status!=='abandoned').flatMap(e=>e.modules.flatMap(m=>m.questionIds))]);
 }
 export function chooseQuestions(questions,taken,{section,count,difficulty='mixed',seed=1}){
  let cursor=seed>>>0;const random=()=>{cursor=(1664525*cursor+1013904223)>>>0;return cursor/4294967296;};
@@ -117,6 +119,7 @@ export function importStudio(value,questions){
  for(const e of value.exams){if(!/^[\w-]{1,100}$/.test(e.id)||!['active','between','break','complete','abandoned'].includes(e.status)||!Array.isArray(e.modules)||!e.modules.length||e.modules.length>4||!Number.isInteger(e.moduleIndex)||e.moduleIndex<0||e.moduleIndex>=e.modules.length||!Number.isInteger(e.index)||e.index<0||e.index>=e.modules[e.moduleIndex].questionIds.length||e.deadline!==null&&(!Number.isFinite(e.deadline)||e.deadline<0))throw Error('Invalid assessment in backup.');for(const m of e.modules){if(!Array.isArray(m.questionIds)||!m.questionIds.length||m.questionIds.length>27||m.questionIds.some(id=>!allowed.has(id))||!Array.isArray(m.records)||!m.answers||typeof m.answers!=='object'||Object.values(m.answers).some(v=>typeof v!=='string'||v.length>100)||!Array.isArray(m.flags)||m.flags.some(id=>!m.questionIds.includes(id)))throw Error('This assessment contains invalid data or questions missing from your library.');}}
  if(value.events.some(e=>typeof e.key!=='string'||!Number.isFinite(e.points)||e.points<0||e.points>1000||!Number.isFinite(Date.parse(e.at))))throw Error('Invalid activity data.');
  const clean=initializeStudio({studio:structuredClone(value)});
+ clean.learning=validateLearning(value.learning,questions);
  if(!Number.isInteger(clean.weeklyGoal)||clean.weeklyGoal<25||clean.weeklyGoal>5000)throw Error('Invalid weekly goal.');
  for(const item of Object.values(clean.vocab))if(!Number.isInteger(item.repetitions)||item.repetitions<0||item.repetitions>1000)throw Error('Invalid vocabulary review data.');
  for(const item of Object.values(clean.vocab))if(item.due&&!validDate(item.due))throw Error('Invalid vocabulary review date.');
@@ -127,6 +130,7 @@ export function importStudio(value,questions){
 }
 export function mergeStudio(existing,incoming){
  const out={...existing,...incoming,focus:false};
+ out.learning=mergeLearning(initializeLearning(existing),initializeLearning(incoming));
  for(const key of ['lessons','review','vocab']){out[key]={...existing[key]};for(const [id,value] of Object.entries(incoming[key]||{})){const old=out[key][id];if(!old||String(value.updatedAt||value.at||'')>=String(old.updatedAt||old.at||''))out[key][id]=value;}}
  out.saved=[...new Set([...existing.saved,...incoming.saved])];out.notes={...existing.notes,...incoming.notes};out.annotations={...existing.annotations,...incoming.annotations};out.eliminated={...existing.eliminated,...incoming.eliminated};out.challenge={...existing.challenge,...incoming.challenge};
  out.events=[...new Map([...existing.events,...incoming.events].map(e=>[e.key,e])).values()];
