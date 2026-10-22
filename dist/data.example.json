@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "questionCount": 0,
+  "questions": [],
+  "history": [],
+  "diagnostics": [],
+  "foundationIds": [],
+  "readingFoundationIds": [],
+  "goal": {
+    "total": null,
+    "baseline": null,
+    "readingWriting": null,
+    "math": null,
+    "recentMath": null,
+    "testDate": null
+  }
+}
