@@ -1,5 +1,5 @@
 // Evidence for learning, kept separate from repeat-question correction and effort XP.
-import {gradeAnswer} from './logic.js?v=8';
+import {gradeAnswer} from './logic.js?v=9';
 
 export const CONFIDENCE = ['sure','unsure','guessing'];
 export const METHODS = ['algebra','desmos','mental','evidence','grammar','other'];

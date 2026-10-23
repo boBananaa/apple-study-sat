@@ -1,5 +1,5 @@
-import {VIDEO,CHAPTERS,DESMOS_TIPS} from './desmos-content.js?v=8';
-import {matchDesmosTips,searchDesmosTips} from './desmos-matching.js?v=8';
+import {VIDEO,CHAPTERS,DESMOS_TIPS} from './desmos-content.js?v=9';
+import {matchDesmosTips,searchDesmosTips} from './desmos-matching.js?v=9';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const time=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 const link=(url,label)=>`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`;

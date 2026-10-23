@@ -24,7 +24,7 @@ Use Python 3.10 or later. No JavaScript installation or build step is needed.
 python -m http.server 8000 --directory dist
 ```
 
-Open `http://localhost:8000`. Select **Study profile** to enter scores, a goal, and a test date. The clean edition starts without personal information or question material.
+Open `http://localhost:8000`. Open **Settings** to enter scores, a goal, and a test date. The clean edition starts without personal information or question material.
 
 ## Load your own PDF question bank
 
@@ -55,7 +55,7 @@ The app uses supplied answer keys rather than generated answers. Most setups and
 
 ## Import your study information
 
-Open **Study profile → Import profile JSON**. Either upload a `tutoring_state.json` file with a `goal`, `diagnostic.responses`, and `targeted_sessions[].responses`, or use this simple shape:
+Open **Settings → Question library and backups → Import or edit a profile → Import profile JSON**. Either upload a `tutoring_state.json` file with a `goal`, `diagnostic.responses`, and `targeted_sessions[].responses`, or use this simple shape:
 
 ```json
 {
@@ -68,7 +68,7 @@ Open **Study profile → Import profile JSON**. Either upload a `tutoring_state.
 }
 ```
 
-Replace null values with your own information. Section scores range from 200 to 800, the target ranges from 400 to 1600, and the date uses `YYYY-MM-DD`. Recognized earlier question IDs are excluded from fresh practice. Export progress from **Your progress** to move website sessions to another browser or share them with a tutor.
+Replace null values with your own information. Section scores range from 200 to 800, the target ranges from 400 to 1600, and the date uses `YYYY-MM-DD`. Recognized earlier question IDs are excluded from fresh practice. Export progress from **Settings → Question library and backups** to move website sessions to another browser or share them with a tutor.
 
 ## Privacy and publishing
 
@@ -90,11 +90,13 @@ For hosting, serve the `dist/` directory with any static host. No secrets are re
 
 ## Adaptive study routines
 
-Open **Study plan** to enter diagnostic correct/total counts for Math or Reading and Writing, select study days and minutes, and enter your next SAT date. New installations start with no diagnostic or personal data. Diagnostic JSON import uses the downloadable template on that page. Screenshots and PDFs are not automatically read.
+Open **Settings** to enter diagnostic correct/total counts for Math or Reading and Writing, select study days and minutes, and enter your next SAT date. New installations start with no diagnostic or personal data. Diagnostic JSON import uses the downloadable template in that section. Screenshots and PDFs are not automatically read.
 
 Plans use the most recent diagnostic per skill and up to ten subsequent practice answers. An answer counts as independent only when correct, without hints/reveal, and with a valid setup or self-checked reasoning. Small diagnostic samples are shrunk toward 50%; priorities spread practice among weak and untested skills. No scaled-score prediction is made. Hard practice requires stable skill results and a completed stable set; pace targets require two stable sets.
 
-Calendar sessions respect weekdays and the test deadline and allocate practice, review, and breaks. The next 28 sessions (up to 12 weeks) refresh as results change. A paused set reserves its questions; attempted IDs and IDs scheduled elsewhere are excluded. Each session launches real questions from the local library. Plan estimates may differ from actual study time.
+Home shows a short daily sequence with one Continue action: resume saved work, rework an earlier question, take a due fresh check, or study a priority skill. Its length respects the daily time budget. Completing a step keeps the original sequence intact; new diagnostics or library changes can adjust work you have not started. Completed work is retained.
+
+A real future test date enables read-only previews on selected study days, up to fourteen upcoming days. Without a date, Home offers an undated starting point. Future previews are tentative and do not reserve questions. Fresh IDs are chosen and checked again only when practice starts. Estimates may differ from actual study time.
 
 Routine preferences, diagnostics, and session results remain in browser storage and are included in progress exports/imports. No AI service, API key, or cloud progress sync is used. Editing or deleting a diagnostic rebuilds future recommendations; completed sessions are retained.
 
@@ -104,7 +106,7 @@ The interface includes an adaptive learning path, 29 original skill lessons, wor
 
 **Assessments:** a 12-question diagnostic per selected section; Math or Reading and Writing simulations with two modules; full 98-question SAT simulation (four modules plus a 10-minute break); standard, 1.5x, or 2x practice timing. Timers use persisted deadlines and continue across reloads. Answers may be revisited within the current module and flagged for review; submitting or timing out locks a module. Module 2 uses this app's 65% accuracy threshold to select a harder or support question mix. Questions are balanced approximately by domain and never reused in fresh practice or other reserved assessments.
 
-These are assembled practice simulations, not College Board tests or calibrated SAT scores. Reports show raw accuracy and per-skill diagnostics; setups are not collected during assessments and do not unlock setup mastery. Use Bluebook for official full-length checkpoints. Official/self-reported score checkpoints can be entered manually in Analytics; screenshots and PDFs are not automatically parsed.
+These are assembled practice simulations, not College Board tests or calibrated SAT scores. Reports show raw accuracy and per-skill diagnostics; setups are not collected during assessments and do not unlock setup mastery. Use Bluebook for official full-length checkpoints. Official/self-reported score checkpoints can be entered manually in Analysis; screenshots and PDFs are not automatically parsed.
 
 **Persistence:** progress exports include all study tools, notes, saved items, vocabulary spacing, lessons, exams and routines. Imports validate question IDs and preserve distinct work. Everything is browser-local. Personal best weeks are a personal leaderboard; there is no fabricated global competition or multi-user cloud service.
 
@@ -114,11 +116,11 @@ These are assembled practice simulations, not College Board tests or calibrated 
 
 ## Navigation
 
-The six main sections are Learn, Practice, Review, Progress, Vocabulary, and Practice tests. Learn groups Today, Lessons, Study plan, Desmos tips, and Desmos week. Practice groups the current session and Question bank. Progress groups Overview, History, and Milestones. Settings holds profile, theme, export, and backup access. Practice tools and optional guidance open when needed.
+The four main tabs are **Home**, **Practice**, **Analysis**, and **Settings**. Home is the guided daily path. Practice offers skill practice, review, and assessments, with lessons, Desmos guides, and vocabulary under a closed study-tools section. Analysis contains performance, attempt history, and milestones. Settings holds the routine, diagnostics, profile, theme, library setup, and backups. The stopwatch stays available across the app.
 
 ## Desmos question tips
 
-Learn → Desmos tips contains 32 original methods covering all ten instructional chapters of LearnSATMath’s [33:37 guide](https://www.youtube.com/watch?v=jCT0jTVzKy0). The full auto-caption transcript was reviewed October 22, 2026; entries link to source timestamps and official Desmos/College Board documentation. Examples are original study material, not official questions. Video shortcuts are qualified for domains, precision, parameter constraints, root counts and regression limits.
+Practice → Lessons and study tools → Desmos guides contains 32 original methods covering all ten instructional chapters of LearnSATMath’s [33:37 guide](https://www.youtube.com/watch?v=jCT0jTVzKy0). The full auto-caption transcript was reviewed October 22, 2026; entries link to source timestamps and official Desmos/College Board documentation. Examples are original study material, not official questions. Video shortcuts are qualified for domains, precision, parameter constraints, root counts and regression limits.
 
 Math practice questions, rework questions, and completed assessment reviews have a Desmos tips button. Search by words, chapter, or Math skill. The referenced methods use [SAT Desmos](https://www.desmos.com/testing/collegeboard), not the limited local graph plotter. Opening the question’s list alone does not count as help; expanding a method before submitting a practice answer records the unique tip ID and increments assistance. Review methods mark the rework assisted. Active assessments keep instructional tips out of the test player; methods are available in the completed review. Progress exports retain the tip IDs and assistance.
 
@@ -153,6 +155,6 @@ Run `npm test`, `python scripts/check_public_source.py`, and the Python tests be
 - **Confidence and time:** new practice asks for Sure, Unsure, or Guessing before feedback. Progress compares first-answer accuracy, help used, and median active study time by section, with skills to revisit. Guessed correct answers keep their raw correctness but do not count toward readiness or a passed delayed check. Older unrated records remain unrated. Active time is approximate visible, focused time; it is separate from the optional stopwatch and assessment deadlines.
 - **Honest lesson completion:** completing an original lesson check means the lesson was reviewed. A miss gives a hint before an optional worked-answer reveal. The lesson alone does not certify skill mastery.
 
-Delayed checks appear under Learn and Review. Their dates are independent of the calendar routine. Merely displaying a question marks it exposed for future fresh selection, including in an assessment that is later archived. Progress backups include this exposure history, correction attempts, confidence, and delayed-check evidence. Equal-length session imports can merge correction progress while preserving first attempts.
+Delayed checks appear on Home when due and under Practice → Review. Their dates are independent of the calendar routine. Merely displaying a question marks it exposed for future fresh selection, including in an assessment that is later archived. Progress backups include this exposure history, correction attempts, confidence, and delayed-check evidence. Equal-length session imports can merge correction progress while preserving first attempts.
 
 Without an imported question library, the app clearly offers bank setup instead of promising a five-question practice session. Lessons and vocabulary remain available. Both Math and Reading and Writing use the same learning evidence rules.

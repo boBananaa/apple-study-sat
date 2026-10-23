@@ -1,4 +1,4 @@
-import {SKILLS,SECTIONS,localDate,normalizeDiagnostic,normalizeRoutine,buildPlan} from './planner.js?v=8';
+import {SKILLS,SECTIONS,localDate,normalizeDiagnostic,normalizeRoutine,buildPlan} from './planner.js?v=9';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const pretty=date=>new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',timeZone:'UTC'});

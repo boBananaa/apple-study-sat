@@ -1,6 +1,7 @@
-import {initializeLearning,validateLearning,mergeLearning} from './learning-logic.js?v=8';
-import {gradeAnswer} from './logic.js?v=8';
-import {localDate,addDays,validDate} from './planner.js?v=8';
+import {validateHomePath,mergeHomePath} from './path-state.js?v=9';
+import {initializeLearning,validateLearning,mergeLearning} from './learning-logic.js?v=9';
+import {gradeAnswer} from './logic.js?v=9';
+import {localDate,addDays,validDate} from './planner.js?v=9';
 
 export const isIndependent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true&&!r.previouslyExposed&&r.confidence!=='guessing';
 export function initializeStudio(state){
@@ -112,6 +113,13 @@ export function finishExam(state,exam){
  }
  award(initializeStudio(state),'exam-'+exam.id,exam.kind==='diagnostic'?40:100,'assessment',exam.completedAt);exam.synced=true;return true;
 }
+function normalizePreferences(value){
+ if(value==null)return null;
+ if(typeof value!=='object'||Array.isArray(value))throw Error('Invalid study preferences in backup.');
+ const scope=value.scope??'Math',minutes=value.minutes??30,days=value.days??[1,2,3,4,5];
+ if(!['Math','Reading and Writing','Both'].includes(scope)||!Number.isInteger(minutes)||minutes<15||minutes>120||!Array.isArray(days)||!days.length||days.length>7||days.some(day=>!Number.isInteger(day)||day<0||day>6))throw Error('Invalid study preferences in backup.');
+ return {scope,minutes,days:[...new Set(days)].sort((a,b)=>a-b)};
+}
 export function importStudio(value,questions){
  if(!value||value.version!==1)throw Error('This study-tool backup is not supported.');
  const allowed=new Set(questions.map(q=>q.id));
@@ -120,6 +128,9 @@ export function importStudio(value,questions){
  if(value.events.some(e=>typeof e.key!=='string'||!Number.isFinite(e.points)||e.points<0||e.points>1000||!Number.isFinite(Date.parse(e.at))))throw Error('Invalid activity data.');
  const clean=initializeStudio({studio:structuredClone(value)});
  clean.learning=validateLearning(value.learning,questions);
+ clean.homePath=validateHomePath(value.homePath);
+ const preferences=normalizePreferences(value.preferences);
+ if(preferences)clean.preferences=preferences;else delete clean.preferences;
  if(!Number.isInteger(clean.weeklyGoal)||clean.weeklyGoal<25||clean.weeklyGoal>5000)throw Error('Invalid weekly goal.');
  for(const item of Object.values(clean.vocab))if(!Number.isInteger(item.repetitions)||item.repetitions<0||item.repetitions>1000)throw Error('Invalid vocabulary review data.');
  for(const item of Object.values(clean.vocab))if(item.due&&!validDate(item.due))throw Error('Invalid vocabulary review date.');
@@ -131,6 +142,9 @@ export function importStudio(value,questions){
 export function mergeStudio(existing,incoming){
  const out={...existing,...incoming,focus:false};
  out.learning=mergeLearning(initializeLearning(existing),initializeLearning(incoming));
+ out.homePath=mergeHomePath(existing.homePath,incoming.homePath);
+ const preferences=normalizePreferences(incoming.preferences)||normalizePreferences(existing.preferences);
+ if(preferences)out.preferences=preferences;else delete out.preferences;
  for(const key of ['lessons','review','vocab']){out[key]={...existing[key]};for(const [id,value] of Object.entries(incoming[key]||{})){const old=out[key][id];if(!old||String(value.updatedAt||value.at||'')>=String(old.updatedAt||old.at||''))out[key][id]=value;}}
  out.saved=[...new Set([...existing.saved,...incoming.saved])];out.notes={...existing.notes,...incoming.notes};out.annotations={...existing.annotations,...incoming.annotations};out.eliminated={...existing.eliminated,...incoming.eliminated};out.challenge={...existing.challenge,...incoming.challenge};
  out.events=[...new Map([...existing.events,...incoming.events].map(e=>[e.key,e])).values()];
