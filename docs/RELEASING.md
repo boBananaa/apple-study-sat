@@ -6,7 +6,7 @@ The app source is `dist/`; GitHub Pages serves only `site/`. Tauri packages the 
 
 The Desktop release workflow runs on app-source pushes to main. It tests learning behavior and public-source privacy, stamps version `0.2.<workflow run number>`, runs native tests, and builds a universal Mac DMG plus a Windows NSIS installer. Tauri generates signed updater archives and `latest.json`.
 
-The release stays a draft until both platform builds pass. A failed build never replaces the last published update. The app reads the latest published release manifest over HTTPS and verifies its signature with the embedded public key. It installs only outside practice/tests and when no form or dialog is open, then restarts. A check also runs every six hours. No progress is uploaded during this check.
+After checks pass, the workflow creates an exact source tag while the commit is still the branch head. The release stays a draft until both platform builds pass. Superseded source pushes stay unpublished. A failed build never replaces the last published update. The app reads the latest published release manifest over HTTPS and verifies its signature with the embedded public key. It installs only outside practice/tests and when no form or dialog is open, then restarts. A check also runs every six hours. No progress is uploaded during this check.
 
 A workflow rerun uses the same version; an additional push gets a later version. Download links on Pages are discovered from the verified GitHub release API with a release-page fallback.
 
