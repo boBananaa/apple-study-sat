@@ -16,6 +16,7 @@ Enter the section scores and eight domain bands from one actual SAT or official 
 - **Both SAT sections:** 111 original lessons covering all 29 question-bank skills, with worked examples, traps, recognition rules, and checks.
 - **Learn Desmos by applying it:** 32 methods, each with its own original practice question and a setup before the answer.
 - **Check progress over time:** periodic official Bluebook checkpoints refresh the roadmap until your test date or until you pause them because you’re happy with your practice score.
+- **Question Rush:** short timed rounds in both sections, with pace choices, accuracy, streaks, and speed stars. Misses go to Review; speed scores do not establish setup mastery.
 - **Practice honestly:** first answers, hints, corrections, confidence, and delayed fresh checks stay distinct. No invented mastery or predicted SAT scores.
 - **Keep your study room local:** stopwatch, scratchpad, question annotations, vocabulary, and backups. No account, server, subscription, or AI API key required.
 

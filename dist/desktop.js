@@ -10,7 +10,7 @@ export async function loadDesktopLibrary(){
  return library.data;
 }
 export async function saveDesktopBackup(payload){return invoke('save_backup',{contents:JSON.stringify(payload,null,2)});}
-function safeToRestart(){return !['#practice','#tests'].includes(location.hash)&&!document.querySelector('dialog[open]')&&!document.querySelector('form');}
+function safeToRestart(){return !['#practice','#tests','#rush'].includes(location.hash)&&!document.querySelector('dialog[open]')&&!document.querySelector('form');}
 async function applyUpdate(){if(!update||installing||!safeToRestart())return;installing=true;context.save();context.toast('Installing the verified update. Apple SAT will restart; your work is saved.');try{await invoke('install_update',{version:update.version});}catch(e){installing=false;context.toast('The update could not install. Your current app and progress are unchanged.');}}
 async function check(manual=false){
  if(checking||!isDesktop())return;checking=true;

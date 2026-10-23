@@ -34,7 +34,7 @@ export function createPathController(context){
   const s=state(),l=library(s.section),paused=s.sessions.find(x=>x.id===s.activeId&&!x.completed&&x.type!=='assessment'&&x.section===s.section)||s.sessions.find(x=>!x.completed&&x.type!=='assessment'&&x.section===s.section);
   const e=s.studio.exams.find(x=>['active','between','break'].includes(x.status));
   const resume=e?{id:'assessment',title:'Your assessment is in progress',description:'Continue the current module or break.'}:paused?{id:paused.id,title:'Your practice is saved',description:(paused.questionIds.length-paused.records.length)+' questions left in '+paused.section+'.'}:null;
-  return practiceHubMarkup({sectionLabel:s.section,resume,library:l,items:[{id:'skills',title:'Practice a skill',description:'Choose a skill and build a fresh question set.',meta:l.fresh+' unused Easy or Medium questions',state:l.fresh?'available':'blocked'},{id:'review',title:'Review earlier questions',description:'Rework mistakes and take fresh checks when they are due.'},{id:'tests',title:'App diagnostics and simulations',description:'Practice the test-day rhythm. For official score checkpoints, use Bluebook.',state:l.count?'available':'blocked'}]});
+  return practiceHubMarkup({sectionLabel:s.section,resume,library:l,items:[{id:'skills',title:'Practice a skill',description:'Choose a skill and build a fresh question set.',meta:l.fresh+' unused Easy or Medium questions',state:l.fresh?'available':'blocked'},{id:'rush',title:'Question Rush',description:'Short timed rounds for accuracy and pacing. Speed results stay separate from setup mastery.'},{id:'review',title:'Review earlier questions',description:'Rework mistakes and take fresh checks when they are due.'},{id:'tests',title:'App diagnostics and simulations',description:'Practice the test-day rhythm. For official score checkpoints, use Bluebook.',state:l.count?'available':'blocked'}]});
  }
  function settings(){
   const p=getProfile(),prefs=preferences(),diagnostics=state().diagnostics||[];
@@ -72,7 +72,7 @@ export function createPathController(context){
    if(e&&target.dataset.id==='assessment'){s.studio.activeExamId=e.id;save();go('tests');}
    else {const session=s.sessions.find(x=>x.id===target.dataset.id&&!x.completed)||s.sessions.find(x=>x.id===s.activeId&&!x.completed);if(session){s.section=session.section;s.activeId=session.id;save();go('practice');}else go('home');}return true;
   }
-  if(action==='practice-open'){const routes={skills:'bank',review:'review',tests:'tests',lessons:'lessons',desmos:'desmos',vocabulary:'vocab'};if(routes[target.dataset.id]){if(state().studio.homePath)state().studio.homePath.active=null;save();go(routes[target.dataset.id]);}return true;}
+  if(action==='practice-open'){const routes={rush:'rush',skills:'bank',review:'review',tests:'tests',lessons:'lessons',desmos:'desmos',vocabulary:'vocab'};if(routes[target.dataset.id]){if(state().studio.homePath)state().studio.homePath.active=null;save();go(routes[target.dataset.id]);}return true;}
   return false;
  }
  function submit(event){

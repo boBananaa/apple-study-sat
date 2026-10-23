@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createRush,submitRushAnswer,advanceRush,endRush} from '../dist/rush-logic.js';
+import {initializeStudio,examTaken,reviewQueue,importStudio,mergeStudio} from '../dist/studio-logic.js';
+import {rankSkills} from '../dist/planner.js';
+import {stableSession} from '../dist/logic.js';
+const questions=Array.from({length:20},(_,i)=>({id:`fixture-${i}`,section:'Math',skill:'Linear Functions',domain:'Algebra',difficulty:'Medium',answer:'A',file:'Synthetic fixture.pdf',page:1,number:String(i+1)}));
+const base=()=>({section:'Math',sessions:[],diagnostics:[],studio:initializeStudio({})});
+test('Rush reserves fresh questions across app modes, keeps misses in Review, and does not unlock mastery',()=>{
+ const state=base(),round=createRush(questions,examTaken(state),{id:'integration',section:'Math',count:5,now:1000});state.studio.rushRounds.push(round);
+ assert.equal(examTaken(state).size,5);
+ const q=questions.find(q=>q.id===round.questionIds[0]);submitRushAnswer(round,q,'B',false,2000);
+ assert.equal(reviewQueue(state,questions).length,1);assert.match(reviewQueue(state,questions)[0].reason,/Rush/);
+ assert.equal(state.sessions.length,0);assert.equal(state.sessions.some(stableSession),false);
+ assert.equal(rankSkills({section:'Math',questions,sessions:state.sessions,diagnostics:[]}).find(r=>r.skill==='Linear Functions').practiceCount,0);
+ advanceRush(round,3000);endRush(round,4000);
+ assert.equal(reviewQueue(state,questions).length,2);
+ assert.equal(examTaken(state).size,2);assert.ok(examTaken(state).has(round.questionIds[1]));
+ const restored=importStudio(JSON.parse(JSON.stringify(state.studio)),questions);assert.equal(restored.rushRounds.length,1);
+ const merged=mergeStudio(base().studio,restored);assert.deepEqual([...examTaken({sessions:[],studio:merged})].sort(),[...examTaken(state)].sort());
+ assert.throws(()=>importStudio(state.studio,questions.filter(q=>q.id!==round.questionIds[0])));
+});

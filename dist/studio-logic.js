@@ -1,3 +1,4 @@
+import {validateRush,mergeRush} from './rush-logic.js?v=10';
 import {validateOfficialResults,mergeOfficialResults} from './results-logic.js?v=10';
 import {validateDesmosPractice,mergeDesmosPractice} from './desmos-practice.js?v=10';
 import {validateHomePath,mergeHomePath} from './path-state.js?v=10';
@@ -8,7 +9,7 @@ import {localDate,addDays,validDate} from './planner.js?v=10';
 export const isIndependent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true&&!r.previouslyExposed&&r.confidence!=='guessing';
 export function initializeStudio(state){
  state.studio ||= {};
- const defaults={version:1,lessons:{},vocab:{},review:{},saved:[],notes:{},annotations:{},eliminated:{},exams:[],events:[],challenge:{},theme:'light',weeklyGoal:100,focus:false,scoreReports:[]};
+ const defaults={version:1,lessons:{},vocab:{},review:{},saved:[],notes:{},annotations:{},eliminated:{},exams:[],rushRounds:[],activeRushId:null,events:[],challenge:{},theme:'light',weeklyGoal:100,focus:false,scoreReports:[]};
  for(const [key,value] of Object.entries(defaults))state.studio[key]??=value;
  initializeLearning(state.studio);
  return state.studio;
@@ -29,13 +30,15 @@ export function activity(state,today=localDate()){
 export function reviewQueue(state,questions,today=localDate()){
  const byId=new Map(questions.map(q=>[q.id,q])),latest=new Map();
  for(const s of state.sessions||[])for(const r of s.records||[])latest.set(r.questionId,r);
+ for(const round of state.studio?.rushRounds||[])for(const result of round.results||[])if(!latest.has(result.questionId))latest.set(result.questionId,{...result,hintsUsed:0,setupCorrect:null,fromRush:true});
+ for(const round of state.studio?.rushRounds||[])if(!['active','feedback'].includes(round.status))for(const id of round.exposedIds||[])if(!latest.has(id))latest.set(id,{questionId:id,answer:null,correct:false,hintsUsed:0,setupCorrect:null,fromRush:true});
  for(const id of state.studio?.saved||[])if(!latest.has(id))latest.set(id,{questionId:id,correct:true,hintsUsed:0,setupCorrect:null,bookmarkOnly:true});
  return [...latest].flatMap(([id,r])=>{
   const q=byId.get(id),progress=state.studio?.review?.[id];
   if(!q)return[];
   const needs=!r.correct||r.hintsUsed>0||r.revealed||r.setupCorrect===false||r.confidence==='guessing'||state.studio?.saved?.includes(id);
   if(!needs)return[];
-  return [{question:q,record:r,progress,due:!progress?.due||progress.due<=today,reason:r.bookmarkOnly?'Saved for later':r.revealed?'Solution revealed':!r.correct?'Answer missed':r.hintsUsed?'Hint used':r.setupCorrect===false?'Setup needs work':r.confidence==='guessing'?'Correct but guessed':'Saved for review'}];
+  return [{question:q,record:r,progress,due:!progress?.due||progress.due<=today,reason:r.fromRush?'Question Rush: missed or timed out':r.bookmarkOnly?'Saved for later':r.revealed?'Solution revealed':!r.correct?'Answer missed':r.hintsUsed?'Hint used':r.setupCorrect===false?'Setup needs work':r.confidence==='guessing'?'Correct but guessed':'Saved for review'}];
  }).sort((a,b)=>Number(b.due)-Number(a.due)||String(a.progress?.due||'').localeCompare(String(b.progress?.due||'')));
 }
 export function recordReview(studio,id,{correct,setup,rule,errorType='Unknown',hinted=false},today=localDate()){
@@ -53,7 +56,7 @@ export function rateVocabulary(studio,id,rating,today=localDate()){
  return studio.vocab[id];
 }
 export function examTaken(state,history=[]){
- return new Set([...Object.keys(state.studio?.learning?.exposures||{}),...history.map(r=>r.questionId),...(state.sessions||[]).flatMap(s=>s.records.map(r=>r.questionId)),...(state.sessions||[]).filter(s=>!s.completed).flatMap(s=>s.questionIds),...(state.studio?.exams||[]).filter(e=>e.status!=='abandoned').flatMap(e=>e.modules.flatMap(m=>m.questionIds))]);
+ return new Set([...(state.studio?.rushRounds||[]).flatMap(r=>['active','feedback'].includes(r.status)?r.questionIds:r.exposedIds||[]),...Object.keys(state.studio?.learning?.exposures||{}),...history.map(r=>r.questionId),...(state.sessions||[]).flatMap(s=>s.records.map(r=>r.questionId)),...(state.sessions||[]).filter(s=>!s.completed).flatMap(s=>s.questionIds),...(state.studio?.exams||[]).filter(e=>e.status!=='abandoned').flatMap(e=>e.modules.flatMap(m=>m.questionIds))]);
 }
 export function chooseQuestions(questions,taken,{section,count,difficulty='mixed',seed=1}){
  let cursor=seed>>>0;const random=()=>{cursor=(1664525*cursor+1013904223)>>>0;return cursor/4294967296;};
@@ -133,6 +136,8 @@ export function importStudio(value,questions,{today=localDate()}={}){
  clean.homePath=validateHomePath(value.homePath);
  clean.officialResults=validateOfficialResults(value.officialResults,{today});
  clean.desmosPractice=validateDesmosPractice(value.desmosPractice);
+ clean.rushRounds=validateRush(value.rushRounds||[],questions);
+ clean.activeRushId=clean.rushRounds.some(r=>r.id===value.activeRushId)?value.activeRushId:null;
  const preferences=normalizePreferences(value.preferences);
  if(preferences)clean.preferences=preferences;else delete clean.preferences;
  if(!Number.isInteger(clean.weeklyGoal)||clean.weeklyGoal<25||clean.weeklyGoal>5000)throw Error('Invalid weekly goal.');
@@ -149,6 +154,8 @@ export function mergeStudio(existing,incoming,{today=localDate()}={}){
  out.homePath=mergeHomePath(existing.homePath,incoming.homePath);
  out.officialResults=mergeOfficialResults(existing.officialResults,incoming.officialResults,{today});
  out.desmosPractice=mergeDesmosPractice(existing.desmosPractice,incoming.desmosPractice);
+ out.rushRounds=mergeRush(existing.rushRounds||[],incoming.rushRounds||[]);
+ out.activeRushId=out.rushRounds.some(r=>r.id===incoming.activeRushId)?incoming.activeRushId:existing.activeRushId||null;
  const preferences=normalizePreferences(incoming.preferences)||normalizePreferences(existing.preferences);
  if(preferences)out.preferences=preferences;else delete out.preferences;
  for(const key of ['lessons','review','vocab']){out[key]={...existing[key]};for(const [id,value] of Object.entries(incoming[key]||{})){const old=out[key][id];if(!old||String(value.updatedAt||value.at||'')>=String(old.updatedAt||old.at||''))out[key][id]=value;}}
