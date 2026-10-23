@@ -31,7 +31,7 @@ def check():
     for path in paths:
         rel = path.relative_to(ROOT)
         blocked = (
-            rel.suffix.lower() in {'.pdf', '.zip', '.pyc', '.tar', '.gz'}
+            rel.suffix.lower() in {'.pdf', '.zip', '.pyc', '.tar', '.gz', '.key', '.pem', '.p12', '.pfx'}
             or rel.name.startswith('.env')
             or '.openai' in rel.parts
             or str(rel).startswith(('dist/assets/questions/', 'dist/assets/keys/'))
@@ -40,6 +40,15 @@ def check():
         )
         if blocked:
             problems.append(f'{rel}: private/generated file')
+            continue
+        allowed_binary = (
+            (str(rel).startswith('src-tauri/icons/') and rel.suffix.lower() in {'.png', '.ico', '.icns'})
+            or (str(rel).startswith('docs/screenshots/') and rel.suffix.lower() == '.png')
+            or (str(rel).startswith('dist/fonts/') and rel.suffix.lower() == '.woff2')
+        )
+        if allowed_binary:
+            if path.stat().st_size > 3_000_000:
+                problems.append(f'{rel}: reviewed asset is unexpectedly large')
             continue
         try:
             text = path.read_text()

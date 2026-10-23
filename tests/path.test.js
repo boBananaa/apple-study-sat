@@ -2,10 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildHomePath,selectHomeTaskQuestions,bindHomeTask,completeHomeTask} from '../dist/path-logic.js';
 import {skillKey} from '../dist/learning-logic.js';
+import {OFFICIAL_DOMAINS,saveOfficialReport} from '../dist/results-logic.js';
 const today='2037-10-21';
 const lessons=[{id:'linear',section:'Math',skill:'Linear Functions',title:'Read a linear model',minutes:5},{id:'area',section:'Math',skill:'Area and Volume',title:'Find the area',minutes:5},{id:'inference',section:'Reading and Writing',skill:'Inferences',title:'Read the evidence',minutes:5}];
 const questions=['Math','Reading and Writing'].flatMap(section=>(section==='Math'?['Linear Functions','Area and Volume']:['Inferences']).flatMap(skill=>Array.from({length:15},(_,i)=>({id:section+'|'+skill+'|'+i,section,skill,difficulty:i===14?'Hard':i<3?'Easy':'Medium'}))));
-const state=()=>({section:'Math',sessions:[],diagnostics:[{section:'Math',date:'2037-10-20',rows:[{skill:'Linear Functions',correct:0,total:10}]}],studio:{lessons:{},review:{},exams:[],learning:{version:1,exposures:{},retention:{}}}});
+const state=()=>{
+ const s={section:'Math',sessions:[],diagnostics:[{section:'Math',date:'2037-10-20',rows:[{skill:'Linear Functions',correct:0,total:10}]}],studio:{lessons:{},review:{},exams:[],learning:{version:1,exposures:{},retention:{}}}};
+ // Synthetic complete official-report fixture; no production baseline is inferred.
+ saveOfficialReport(s,{source:'official-bluebook',date:'2037-10-20',testName:'Synthetic test fixture',math:600,readingWriting:600,domains:Object.fromEntries(Object.entries(OFFICIAL_DOMAINS).map(([section,domains])=>[section,Object.fromEntries(domains.map(domain=>[domain.name,section==='Math'?'470-540':'490-540']))]))},{today});
+ return s;
+};
 const build=(s,extra={})=>buildHomePath({state:s,questions,lessons,today,...extra});
 const practice=plan=>plan.tasks.find(task=>task.kind==='practice');
 test('undated Today offers a stable short sequence and never invents a calendar',()=>{
@@ -127,17 +133,17 @@ test('Home backups retain real completion, linked work, and a validated contextu
  completeHomeTask(s,plan.key,plan.tasks[0].id,{lessonId:'linear',at:today});
  bindHomeTask(s,plan.key,p.id,{sessionId:'portable-session'});
  s.studio.homePath.active={key:plan.key,taskId:p.id};s.studio.preferences={scope:'Both',minutes:30,days:[5,1,3,1],extra:'drop'};
- const imported=importStudio(structuredClone(s.studio),questions);
+ const imported=importStudio(structuredClone(s.studio),questions,{today});
  assert.deepEqual(imported.homePath.active,{key:plan.key,taskId:p.id});
  assert.equal(imported.homePath.days[plan.key].tasks[0].status,'complete');
  assert.equal(imported.homePath.days[plan.key].tasks.find(t=>t.id===p.id).sessionId,'portable-session');
  assert.deepEqual(imported.preferences,{scope:'Both',minutes:30,days:[1,3,5]});
- const baseline=initializeStudio(state()),merged=mergeStudio(baseline,imported);
+ const baseline=initializeStudio(state()),merged=mergeStudio(baseline,imported,{today});
  assert.deepEqual(merged.homePath.active,imported.homePath.active);assert.deepEqual(merged.preferences,imported.preferences);
 });
 test('backup merge keeps local contextual activity and preferences when the incoming backup has neither',()=>{
  const s=state(),plan=build(s);initializeStudio(s);s.studio.homePath.active={key:plan.key,taskId:plan.tasks[0].id};s.studio.preferences={scope:'Reading and Writing',minutes:15,days:[2,4]};
- const older=initializeStudio(state());const merged=mergeStudio(s.studio,importStudio(older,questions));
+ const older=initializeStudio(state());const merged=mergeStudio(s.studio,importStudio(older,questions,{today}),{today});
  assert.deepEqual(merged.homePath.active,s.studio.homePath.active);assert.deepEqual(merged.preferences,s.studio.preferences);
  const stale=structuredClone(s.studio.homePath);stale.active.taskId='no-longer-present';assert.equal(validateHomePath(stale).active,undefined);
  const malformed=structuredClone(s.studio.homePath);malformed.active={key:[],taskId:{}};assert.equal(validateHomePath(malformed).active,undefined);
@@ -145,8 +151,8 @@ test('backup merge keeps local contextual activity and preferences when the inco
 });
 test('backup preferences reject unsafe values and normalize omitted optional fields',()=>{
  const baseline=initializeStudio(state());
- for(const preferences of [{scope:'other'}, {minutes:-1}, {minutes:15.5}, {days:[]}, {days:['1']}, {days:[7]}, []])assert.throws(()=>importStudio({...baseline,preferences},questions));
- assert.deepEqual(importStudio({...baseline,preferences:{scope:'Both'}},questions).preferences,{scope:'Both',minutes:30,days:[1,2,3,4,5]});
+ for(const preferences of [{scope:'other'}, {minutes:-1}, {minutes:15.5}, {days:[]}, {days:['1']}, {days:[7]}, []])assert.throws(()=>importStudio({...baseline,preferences},questions,{today}));
+ assert.deepEqual(importStudio({...baseline,preferences:{scope:'Both'}},questions,{today}).preferences,{scope:'Both',minutes:30,days:[1,2,3,4,5]});
 });
 import {LESSONS} from '../dist/learning-content.js';
 import {markExposure,scheduleRetention} from '../dist/learning-logic.js';

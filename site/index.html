@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#742d43">
+  <meta name="description" content="Apple SAT turns your official SAT results into a daily study path. A free, open-source desktop app for Mac and Windows, with local progress and no AI API required.">
+  <meta property="og:title" content="Apple SAT — A little direction for your next SAT.">
+  <meta property="og:description" content="Start with your real results. Find your next lesson. Practice with purpose. Free for Mac and Windows.">
+  <meta property="og:type" content="website">
+  <title>Apple SAT — A little direction for your next SAT.</title>
+  <link rel="stylesheet" href="site.css">
+  <script src="downloads.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="header wrap">
+    <a class="wordmark" href="#" aria-label="Apple SAT home"><span class="brand-mark" aria-hidden="true"></span>Apple SAT</a>
+    <nav aria-label="Main navigation">
+      <a href="#study">Inside the app</a>
+      <a href="https://github.com/boBananaa/apple-study-sat">GitHub</a>
+      <a class="nav-download" href="#download">Download</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <h1 id="hero-title">A little direction<br>for your next SAT.</h1>
+      <p class="hero-copy">Turn your official results into a daily study path. Learn the skills that need attention, work through your mistakes, and see what sticks.</p>
+      <div class="hero-actions"><a class="button" href="#download">Get Apple SAT</a><span>Free for Mac and Windows</span></div>
+      <figure class="hero-figure">
+        <img src="screenshots/roadmap.png" width="1440" height="1000" alt="Apple SAT Home showing the daily study path and the next recommended activity" fetchpriority="high">
+        <figcaption>Example profile shown. Your next step adapts to your own results.</figcaption>
+      </figure>
+    </section>
+
+    <section class="begin wrap" id="study" aria-labelledby="begin-title">
+      <div class="section-heading"><h2 id="begin-title">Start with where<br>you actually are.</h2><p>An official score report gives your plan a starting point. Your practice helps decide what comes next.</p></div>
+      <ol class="study-steps">
+        <li><h3>Bring your results</h3><p>Enter your official SAT or Bluebook results, your goal, and your test date. Apple SAT uses the evidence you provide to prioritize your study.</p></li>
+        <li><h3>Follow today’s path</h3><p>Move from a focused lesson to practice, corrections, and later checks. Your first answers stay intact, so a retry doesn’t rewrite your progress.</p></li>
+        <li><h3>Check in with Bluebook</h3><p>Take official practice tests periodically and add the new results. Your roadmap can change as your needs do.</p></li>
+      </ol>
+    </section>
+
+    <section class="feature wrap" aria-labelledby="lessons-title">
+      <div class="feature-copy"><h2 id="lessons-title">A lesson before<br>another guess.</h2><p>Find original lessons for Math and Reading and Writing, with worked examples and short checks to put the idea into practice.</p><p>When you miss a question, work through the setup and the reason for the mistake. Return later to check what you remember.</p><a class="text-link" href="https://github.com/boBananaa/apple-study-sat#learning-studio">Read about the study tools</a></div>
+      <figure class="feature-figure"><img src="screenshots/lessons.png" width="1440" height="1000" alt="Apple SAT lesson library for Math and Reading and Writing" loading="lazy"><figcaption>Short lessons that make the next question less unfamiliar.</figcaption></figure>
+    </section>
+
+    <section class="feature feature-reverse wrap" aria-labelledby="desmos-title">
+      <div class="feature-copy"><h2 id="desmos-title">Know what to<br>put into Desmos.</h2><p>Explore 32 calculator methods, each with its own original application question. Plan your setup, ask for a small hint if you need one, then check the answer and explanation.</p><p>The guide includes the details that matter: domains, root counts, rounding, and when a numerical fit needs an algebra check.</p><p class="quiet">Original Desmos exercises are labeled and tracked separately from official question practice.</p></div>
+      <figure class="feature-figure"><img src="screenshots/desmos.png" width="1440" height="1000" alt="An expanded Desmos method with original setup-first application practice in Apple SAT" loading="lazy"><figcaption>Learn the method, then try it yourself.</figcaption></figure>
+    </section>
+
+    <section class="ownership wrap" aria-labelledby="ownership-title">
+      <h2 id="ownership-title">Your study space.<br>On your computer.</h2>
+      <div class="ownership-copy"><p>Apple SAT is free and open source. Your study progress stays on your device, with exports for backups or moving to another computer. No account or AI API key is required.</p><p>Lessons and original Desmos practice come with the app. <strong>Official question-bank material does not.</strong> Import your own supported question bank to use official question practice and assembled assessments.</p><a class="text-link" href="https://github.com/boBananaa/apple-study-sat#load-your-own-pdf-question-bank">See the question-bank import guide</a></div>
+    </section>
+
+    <section class="download-section" id="download" aria-labelledby="download-title">
+      <div class="wrap download-inner">
+        <div><h2 id="download-title">Make room for<br>a better study routine.</h2><p>Download Apple SAT and start with your next step.</p></div>
+        <div class="download-options">
+          <div class="platform"><h3>Mac</h3><p>Universal app for Apple silicon and Intel</p><a class="button button-light" data-download="mac" href="https://github.com/boBananaa/apple-study-sat/releases/latest">Mac releases</a></div>
+          <div class="platform"><h3>Windows</h3><p>Installer for Windows 10 and 11</p><a class="button button-light" data-download="windows" href="https://github.com/boBananaa/apple-study-sat/releases/latest">Windows releases</a></div>
+          <p class="release-status" id="release-status" role="status">Installers are listed on GitHub when a release is published.</p>
+          <p class="preview-note"><strong>Early preview:</strong> these builds are not yet Apple-notarized or Windows publisher-signed, so your operating system may show a warning. In-app updates verify a separate update signature; that is distinct from platform code signing.</p>
+          <p class="update-note">The desktop app checks for updates automatically and verifies downloaded updates before installation.</p>
+          <a class="release-link" href="https://github.com/boBananaa/apple-study-sat/releases">Release notes and all versions</a>
+          <noscript><p class="release-status">Open the releases page above and choose the universal .dmg for Mac or the setup .exe for Windows.</p></noscript>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <div class="footer-top"><a class="wordmark" href="#">Apple SAT</a><div><a href="https://github.com/boBananaa/apple-study-sat">Source code</a><a href="https://github.com/boBananaa/apple-study-sat/issues">Report an issue</a></div></div>
+    <p>An independent study project. Not affiliated with or endorsed by College Board, Desmos, or Apple. SAT is a trademark of College Board. Practice progress is not a scaled SAT score or a score guarantee; use official Bluebook tests for score checkpoints.</p>
+  </footer>
+</body>
+</html>

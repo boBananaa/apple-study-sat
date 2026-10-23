@@ -1,6 +1,6 @@
 // Portable Home plans contain references to real work, never future question reservations.
-import {SECTIONS,validDate} from './planner.js?v=9';
-const kinds=['resume-assessment','resume-practice','correction','retention','lesson','practice','bank-setup','vocabulary'];
+import {SECTIONS,validDate} from './planner.js?v=10';
+const kinds=['resume-assessment','resume-practice','correction','retention','lesson','practice','bank-setup','vocabulary','official-baseline','official-checkpoint'];
 const scopes=[...SECTIONS,'Both'];
 const plain=value=>value&&typeof value==='object'&&!Array.isArray(value)&&[Object.prototype,null].includes(Object.getPrototypeOf(value));
 const copy=value=>JSON.parse(JSON.stringify(value));
@@ -17,8 +17,9 @@ export function validateHomePath(value){
   for(const task of day.tasks){
    if(!plain(task)||typeof task.id!=='string'||!task.id||task.id.length>500||ids.has(task.id)||!kinds.includes(task.kind)||!['pending','complete','blocked'].includes(task.status)||!scopes.includes(task.section))fail();
    ids.add(task.id);
-   for(const field of ['title','description','skill','lessonId','questionId','sessionId','examId','retentionKey'])if(task[field]!=null&&(typeof task[field]!=='string'||task[field].length>4000))fail();
+   for(const field of ['title','description','skill','lessonId','questionId','sessionId','examId','retentionKey','reportId','checkpointDate'])if(task[field]!=null&&(typeof task[field]!=='string'||task[field].length>4000))fail();
    for(const field of ['count','minutes','reviewAttempts','checkCount'])if(task[field]!=null&&(!Number.isInteger(task[field])||task[field]<0||task[field]>1000))fail();
+   if(task.checkpointDate!=null&&!validDate(task.checkpointDate))fail();
    if(Object.hasOwn(task,'questionIds')||task.tentative)fail();
    if(task.completion!=null&&(!plain(task.completion)||JSON.stringify(task.completion).length>12000))fail();
    if(task.bankIds&&(!Array.isArray(task.bankIds)||task.bankIds.length>30000||task.bankIds.some(id=>typeof id!=='string'||id.length>500)))fail();

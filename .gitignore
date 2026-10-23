@@ -18,3 +18,9 @@ profile.json
 SAT Question Bank PDFs/
 
 *.pyc
+
+src-tauri/target/
+src-tauri/gen/
+*.key
+*.key.pub
+site/screenshots/

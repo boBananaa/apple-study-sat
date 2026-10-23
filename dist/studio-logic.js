@@ -1,7 +1,9 @@
-import {validateHomePath,mergeHomePath} from './path-state.js?v=9';
-import {initializeLearning,validateLearning,mergeLearning} from './learning-logic.js?v=9';
-import {gradeAnswer} from './logic.js?v=9';
-import {localDate,addDays,validDate} from './planner.js?v=9';
+import {validateOfficialResults,mergeOfficialResults} from './results-logic.js?v=10';
+import {validateDesmosPractice,mergeDesmosPractice} from './desmos-practice.js?v=10';
+import {validateHomePath,mergeHomePath} from './path-state.js?v=10';
+import {initializeLearning,validateLearning,mergeLearning} from './learning-logic.js?v=10';
+import {gradeAnswer} from './logic.js?v=10';
+import {localDate,addDays,validDate} from './planner.js?v=10';
 
 export const isIndependent=r=>r.correct===true&&r.hintsUsed===0&&!r.revealed&&r.setupCorrect===true&&!r.previouslyExposed&&r.confidence!=='guessing';
 export function initializeStudio(state){
@@ -120,7 +122,7 @@ function normalizePreferences(value){
  if(!['Math','Reading and Writing','Both'].includes(scope)||!Number.isInteger(minutes)||minutes<15||minutes>120||!Array.isArray(days)||!days.length||days.length>7||days.some(day=>!Number.isInteger(day)||day<0||day>6))throw Error('Invalid study preferences in backup.');
  return {scope,minutes,days:[...new Set(days)].sort((a,b)=>a-b)};
 }
-export function importStudio(value,questions){
+export function importStudio(value,questions,{today=localDate()}={}){
  if(!value||value.version!==1)throw Error('This study-tool backup is not supported.');
  const allowed=new Set(questions.map(q=>q.id));
  if(!Array.isArray(value.exams)||value.exams.length>100||!Array.isArray(value.events)||value.events.length>50000)throw Error('Invalid study-tool backup.');
@@ -129,6 +131,8 @@ export function importStudio(value,questions){
  const clean=initializeStudio({studio:structuredClone(value)});
  clean.learning=validateLearning(value.learning,questions);
  clean.homePath=validateHomePath(value.homePath);
+ clean.officialResults=validateOfficialResults(value.officialResults,{today});
+ clean.desmosPractice=validateDesmosPractice(value.desmosPractice);
  const preferences=normalizePreferences(value.preferences);
  if(preferences)clean.preferences=preferences;else delete clean.preferences;
  if(!Number.isInteger(clean.weeklyGoal)||clean.weeklyGoal<25||clean.weeklyGoal>5000)throw Error('Invalid weekly goal.');
@@ -139,10 +143,12 @@ export function importStudio(value,questions){
  for(const e of clean.exams)for(const m of e.modules)if(m.records.some(r=>!m.questionIds.includes(r.questionId)))throw Error('Assessment records do not match the questions.');
  return {...clean,saved:(clean.saved||[]).filter(id=>allowed.has(id)),theme:clean.theme==='dark'?'dark':'light',focus:false};
 }
-export function mergeStudio(existing,incoming){
+export function mergeStudio(existing,incoming,{today=localDate()}={}){
  const out={...existing,...incoming,focus:false};
  out.learning=mergeLearning(initializeLearning(existing),initializeLearning(incoming));
  out.homePath=mergeHomePath(existing.homePath,incoming.homePath);
+ out.officialResults=mergeOfficialResults(existing.officialResults,incoming.officialResults,{today});
+ out.desmosPractice=mergeDesmosPractice(existing.desmosPractice,incoming.desmosPractice);
  const preferences=normalizePreferences(incoming.preferences)||normalizePreferences(existing.preferences);
  if(preferences)out.preferences=preferences;else delete out.preferences;
  for(const key of ['lessons','review','vocab']){out[key]={...existing[key]};for(const [id,value] of Object.entries(incoming[key]||{})){const old=out[key][id];if(!old||String(value.updatedAt||value.at||'')>=String(old.updatedAt||old.at||''))out[key][id]=value;}}

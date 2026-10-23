@@ -1,0 +1,78 @@
+name: Desktop release
+on:
+  push:
+    branches: [main]
+    paths: ['dist/**', 'src-tauri/**', 'scripts/release-version.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/desktop.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22', cache: npm}
+      - run: npm ci
+      - run: npm test
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -p 'test_*.py'
+      - run: python scripts/check_public_source.py
+  build:
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: --target universal-apple-darwin --bundles dmg
+          - platform: windows-latest
+            args: --bundles nsis
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22', cache: npm}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || 'x86_64-pc-windows-msvc' }}
+      - uses: Swatinem/rust-cache@v2
+        with: {workspaces: './src-tauri -> target'}
+      - run: npm ci
+      - id: version
+        run: node scripts/release-version.mjs
+      - run: cargo test --manifest-path src-tauri/Cargo.toml --lib
+      - uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+        with:
+          tagName: app-v__VERSION__
+          releaseName: Apple SAT v__VERSION__
+          releaseBody: |
+            Apple SAT for Mac (Apple Silicon and Intel) and Windows 10/11.
+            Study data stays on your computer. Official question-bank PDFs are not bundled.
+            This early release is not Apple-notarized or Windows publisher-signed. Updater artifacts are verified with the application's separate signing key.
+            See the README for setup, privacy, and library import instructions.
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: node scripts/release-version.mjs
+      - name: Publish only after both platform builds pass
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ steps.version.outputs.tag }}" --draft=false --latest --repo "$GITHUB_REPOSITORY"
+

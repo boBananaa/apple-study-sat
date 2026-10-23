@@ -1,8 +1,9 @@
 // The Home path stores work descriptors. Fresh questions are selected only when work starts.
-import {SECTIONS,addDays,localDate,validDate,rankSkills} from './planner.js?v=9';
-import {freshRetentionQuestions} from './learning-logic.js?v=9';
-import {reviewQueue,examTaken} from './studio-logic.js?v=9';
-import {stableSession} from './logic.js?v=9';
+import {SECTIONS,addDays,localDate,validDate,rankSkills} from './planner.js?v=10';
+import {freshRetentionQuestions} from './learning-logic.js?v=10';
+import {reviewQueue,examTaken} from './studio-logic.js?v=10';
+import {stableSession} from './logic.js?v=10';
+import {resultsGate,rankRoadmapSkills,buildResultsRoadmap} from './results-logic.js?v=10';
 
 const scopes=[...SECTIONS,'Both'];
 const dateOf=value=>typeof value==='string'?value.slice(0,10):'';
@@ -15,16 +16,23 @@ function settingsFor(state,preferences,today,scope){
  const days=Array.isArray(input.days)?[...new Set(input.days.filter(day=>Number.isInteger(day)&&day>=0&&day<=6))].sort():[0,1,2,3,4,5,6];
  const rawDate=Object.hasOwn(input,'testDate')?input.testDate:state.profile?.testDate;
  const testDate=validDate(rawDate)&&rawDate>today?rawDate:null;
- return {scope:scopes.includes(scope)?scope:'Math',days,minutes:Number.isFinite(Number(input.minutes))?Math.max(15,Math.min(120,Math.round(Number(input.minutes)))):20,startDate:validDate(input.startDate)?input.startDate:null,testDate};
+ return {scope:scopes.includes(scope)?scope:'Math',days,minutes:Number.isFinite(Number(input.minutes))?Math.max(15,Math.min(120,Math.round(Number(input.minutes)))):20,startDate:validDate(input.startDate)?input.startDate:null,testDate,enteredTestDate:validDate(rawDate)?rawDate:null};
 }
-function freshPool(state,questions,history,section,skill,hard=false){
+function freshPool(state,questions,history,section,skill,hard=false,band=null){
  hard=!!hard&&(state.sessions||[]).some(session=>session.section===section&&stableSession(session));
+ const preferred=hard?'Hard':band?.band<=3?'Easy':'Medium';
  const taken=examTaken(state,history);
  return questions.filter(q=>q.section===section&&q.skill===skill&&!taken.has(q.id)&&(hard||q.difficulty!=='Hard'))
-  .sort((a,b)=>Number(b.difficulty===(hard?'Hard':'Medium'))-Number(a.difficulty===(hard?'Hard':'Medium'))||String(a.id).localeCompare(String(b.id)));
+  .sort((a,b)=>Number(b.difficulty===preferred)-Number(a.difficulty===preferred)||String(a.id).localeCompare(String(b.id)));
 }
 function sectionFor(state,settings,date){
  if(settings.scope!=='Both')return settings.scope;
+ const priorities=buildResultsRoadmap({state,today:date,testDate:settings.testDate,scope:settings.scope}).sections;
+ // Give the section with the larger remaining score gap two of every three study days.
+ if(priorities.length===2&&priorities[0].gap>=(priorities[1].gap||0)+40){
+  const studied=Object.values(state.studio?.homePath?.days||{}).filter(day=>day.scope==='Both'&&day.date<date&&!day.restDay&&day.tasks?.some(t=>t.kind==='practice'||t.kind==='lesson')).length;
+  return priorities[studied%3===2?1:0].section;
+ }
  const previous=Object.values(state.studio?.homePath?.days||{}).filter(day=>day.scope==='Both'&&day.date<date&&!day.restDay).sort((a,b)=>a.date.localeCompare(b.date)).at(-1);
  if(previous)return previous.section==='Math'?'Reading and Writing':'Math';
  const completed=(state.sessions||[]).filter(s=>s.completed&&s.type!=='assessment'&&SECTIONS.includes(s.section)).sort((a,b)=>String(a.completedAt||a.createdAt||'').localeCompare(String(b.completedAt||b.createdAt||''))).at(-1);
@@ -38,9 +46,9 @@ function pausedTask(state,scope){
  const session=sessions.find(s=>s.id===state.activeId)||sessions.at(-1);
  return session?task('resume-practice',{sessionId:session.id,section:session.section,skill:session.planSkills?.[0],count:Math.max(0,session.questionIds.length-(session.records||[]).length),title:'Continue your saved set',description:'Finish the questions you already started. Your first answers and hints are saved.'}):null;
 }
-function focusFor({state,questions,history,lessons,section}){
- const ranks=rankSkills({section,diagnostics:state.diagnostics||[],sessions:state.sessions||[],questions});
- const candidates=ranks.map(rank=>({...rank,available:freshPool(state,questions,history,section,rank.skill,rank.stable).length,lesson:lessons.find(l=>l.section===section&&l.skill===rank.skill)}));
+function focusFor({state,questions,history,lessons,section,today}){
+ const ranks=rankRoadmapSkills({state,section,questions,today});
+ const candidates=ranks.map(rank=>({...rank,available:freshPool(state,questions,history,section,rank.skill,rank.stable,rank.domainBand).length,lesson:lessons.find(l=>l.section===section&&l.skill===rank.skill&&!state.studio?.lessons?.[l.id]?.completed)}));
  // Use the highest-priority skill with a full fresh set; a short remainder is honest fallback.
  return candidates.find(r=>r.available>=5)||candidates.find(r=>r.available>0)||candidates.find(r=>r.lesson&&!state.studio?.lessons?.[r.lesson.id]?.completed)||candidates.find(r=>r.lesson)||candidates[0];
 }
@@ -48,6 +56,12 @@ function dailyTasks(input,settings,date,section,{preview=false,restDay=false}={}
  const {state,questions,history,lessons}=input;
  const resume=preview?null:pausedTask(state,settings.scope);
  if(restDay)return resume?[{...resume,optional:true}]:[];
+ const roadmap=buildResultsRoadmap({state,today:input.today||date,testDate:settings.testDate,scope:settings.scope});
+ const checkpointForDay=preview?roadmap.checkpoints.find(checkpoint=>checkpoint.date===date):roadmap.checkpointDue?roadmap.nextCheckpoint:null;
+ if(checkpointForDay){
+  const checkpoint=task('official-checkpoint',{section:'Both',checkpointDate:checkpointForDay.date,reportId:roadmap.reportId,title:'Take an official Bluebook SAT practice test',description:'Take a fresh full-length SAT test in Bluebook. Then enter its section scores and all eight domain bands to update your roadmap. Set aside about 2 hours 24 minutes, including the 10-minute break.',minutes:144,official:true});
+  return (resume?[resume,checkpoint]:[checkpoint]).map(item=>preview?{...item,tentative:true,status:'upcoming'}:item);
+ }
  const result=resume?[resume]:[];
  const reviews=reviewQueue({...state,sessions:[{records:history.map(r=>({...r,hintsUsed:r.hintsUsed??(r.assistance==='hinted'?1:0)}))},...(state.sessions||[])]},questions,date)
   .filter(item=>item.due&&allowed(settings.scope,item.question.section));
@@ -58,11 +72,11 @@ function dailyTasks(input,settings,date,section,{preview=false,restDay=false}={}
   .sort((a,b)=>a[1].due.localeCompare(b[1].due)||a[0].localeCompare(b[0]));
  const due=retention.find(([,entry])=>freshRetentionQuestions(state.studio,questions,taken,entry).length>=3);
  if(due)result.push(task('retention',{retentionKey:due[0],section:due[1].section,skill:due[1].skill,count:3,title:'Check a skill after a gap',description:'Three fresh questions, untimed. First answers determine this check.',checkCount:due[1].checks?.length||0,freshAvailable:freshRetentionQuestions(state.studio,questions,taken,due[1],30000).length}));
- const focus=focusFor({...input,section});
+ const focus=focusFor({...input,section,today:date});
  if(focus?.lesson&&!state.studio?.lessons?.[focus.lesson.id]?.completed)result.push(task('lesson',{lessonId:focus.lesson.id,section,skill:focus.skill,minutes:focus.lesson.minutes,title:focus.lesson.title,description:'Review the method and complete its short lesson check.'}));
  if(focus?.available){
   const count=Math.min(5,focus.available);
-  result.push(task('practice',{section,skill:focus.skill,count,title:'Practice '+focus.skill,description:count===5?'Five fresh questions, one at a time. Save your setup or reasoning before checking.':`Finish the ${count} fresh question${count===1?'':'s'} remaining for this skill.`,reason:focus.reason,freshAvailable:focus.available}));
+  result.push(task('practice',{section,skill:focus.skill,planDate:date,count,title:'Practice '+focus.skill,description:count===5?'Five fresh questions, one at a time. Save your setup or reasoning before checking.':`Finish the ${count} fresh question${count===1?'':'s'} remaining for this skill.`,reason:focus.reason,freshAvailable:focus.available}));
  }else{
   if(!result.some(item=>item.kind==='lesson')){
    const lesson=lessons.find(l=>l.section===section&&!state.studio?.lessons?.[l.id]?.completed);
@@ -88,7 +102,7 @@ function dailyTasks(input,settings,date,section,{preview=false,restDay=false}={}
 }
 function signatureFor(state,settings,questions,history){
  // Recording today's planned work changes completion, not the scope of today's work.
- const value=JSON.stringify([settings,state.diagnostics||[],questions.map(q=>[q.id,q.section,q.skill,q.difficulty]),history.map(r=>r.questionId)]);
+ const value=JSON.stringify([settings,state.diagnostics||[],state.studio?.officialResults||null,questions.map(q=>[q.id,q.section,q.skill,q.difficulty]),history.map(r=>r.questionId)]);
  let hash=2166136261;for(let i=0;i<value.length;i++)hash=Math.imul(hash^value.charCodeAt(i),16777619);return (hash>>>0).toString(16);
 }
 function pendingFreshChanged(day,state,questions,history){
@@ -108,10 +122,11 @@ function pendingFreshChanged(day,state,questions,history){
  }
  return changed;
 }
-function reconcile(day,state,questions){
+function reconcile(day,state,questions,today=localDate()){
  for(const item of day.tasks){
   if(item.status==='complete')continue;
   let completion=null;
+  if(item.kind==='official-checkpoint'){const report=resultsGate(state,{today}).report;if(report?.source==='official-bluebook'&&report.id!==item.reportId&&report.date>=item.checkpointDate)completion={reportId:report.id,at:report.enteredAt};}
   if(item.sessionId){const session=(state.sessions||[]).find(s=>s.id===item.sessionId);if(session?.completed)completion={sessionId:session.id,at:session.completedAt||null};}
   if(item.examId){const exam=(state.studio?.exams||[]).find(e=>e.id===item.examId);if(exam?.status==='complete')completion={examId:exam.id,at:exam.completedAt||null};}
   if(item.kind==='lesson'){const reviewed=state.studio?.lessons?.[item.lessonId];if(reviewed?.completed&&(!item.revisit||dateOf(reviewed.at)>=day.date))completion={lessonId:item.lessonId,at:reviewed.at||null};}
@@ -128,8 +143,18 @@ export function buildHomePath({state,questions=[],history=[],lessons=[],today=lo
  state.studio??={};state.studio.learning??={version:1,exposures:{},retention:{}};
  state.studio.homePath??={version:1,days:{}};
  const settings=settingsFor(state,preferences,today,scope),key=today+'|'+settings.scope;
+ const gate=resultsGate(state,{today}),roadmap=buildResultsRoadmap({state,today,testDate:settings.testDate,scope:settings.scope});
+ if(settings.enteredTestDate&&settings.enteredTestDate<=today){
+  const resume=pausedTask(state,settings.scope),tasks=resume?[{...resume,optional:true,ephemeral:true}]:[];
+  return {key,date:today,scope:settings.scope,section:settings.scope==='Both'?'Math':settings.scope,restDay:false,tasks,currentTask:tasks[0]||null,status:resume?'ready':'complete',label:'Today',calendarEnabled:false,testDate:settings.enteredTestDate,needsTestDate:false,needsNewTestDate:true,examDateReached:true,minutes:settings.minutes,upcoming:[],gate:{...gate,ready:false,reason:'test-date-reached',nextAction:'update-test-date',message:'Your entered SAT date has arrived. Review your results or enter your next SAT date to start another study roadmap.'},roadmap};
+ }
+ if(!gate.ready){
+  const resume=pausedTask(state,settings.scope),baseline=task('official-baseline',{section:'Both',title:'Add your latest official SAT results',description:gate.message,minutes:5,ephemeral:true});
+  const tasks=resume?[{...resume,optional:true,ephemeral:true},baseline]:[baseline];
+  return {key,date:today,scope:settings.scope,section:settings.scope==='Both'?'Math':settings.scope,restDay:false,tasks,currentTask:tasks[0],status:'ready',label:'Today',calendarEnabled:false,testDate:settings.testDate,needsTestDate:!settings.testDate,minutes:settings.minutes,upcoming:[],gate,roadmap};
+ }
  const restDay=!settings.days.includes(new Date(today+'T12:00:00Z').getUTCDay())||!!settings.startDate&&today<settings.startDate;
- const input={state,questions,history,lessons};
+ const input={state,questions,history,lessons,today};
  let day=state.studio.homePath.days[key];
  if(!day){
   const section=sectionFor(state,settings,today);
@@ -138,7 +163,7 @@ export function buildHomePath({state,questions=[],history=[],lessons=[],today=lo
   day.signature=signatureFor(state,settings,questions,history);day.signatureVersion=2;
   state.studio.homePath.days[key]=day;
  }
- reconcile(day,state,questions);
+ reconcile(day,state,questions,today);
  const signature=signatureFor(state,settings,questions,history);
  // Adopt the narrower signature for older saved paths without adding new work on upgrade.
  if(day.signatureVersion!==2){day.signature=signature;day.signatureVersion=2;}
@@ -179,7 +204,7 @@ export function buildHomePath({state,questions=[],history=[],lessons=[],today=lo
  const resumed=resume&&tasks.find(item=>item.status!=='complete'&&(resume.sessionId&&item.sessionId===resume.sessionId||resume.examId&&item.examId===resume.examId));
  const currentTask=resumed||tasks.find(item=>item.status!=='complete'&&item.status!=='blocked')||null;
  const {signature:ignoredSignature,signatureVersion:ignoredVersion,...viewDay}=day;
- return {...clone(viewDay),tasks,currentTask,status:restDay?'rest':currentTask?'ready':'complete',label:settings.testDate?today:'Today',calendarEnabled:!!settings.testDate,testDate:settings.testDate,needsTestDate:!settings.testDate,minutes:settings.minutes,upcoming};
+ return {...clone(viewDay),tasks,currentTask,status:restDay?'rest':currentTask?'ready':'complete',label:settings.testDate?today:'Today',calendarEnabled:!!settings.testDate,testDate:settings.testDate,needsTestDate:!settings.testDate,minutes:settings.minutes,upcoming,gate,roadmap};
 }
 
 export function selectHomeTaskQuestions({task,state,questions=[],history=[]}){
@@ -191,8 +216,8 @@ export function selectHomeTaskQuestions({task,state,questions=[],history=[]}){
   return chosen.length===3?chosen.map(q=>q.id):[];
  }
  if(task.kind!=='practice')return[];
- const rank=rankSkills({section:task.section,diagnostics:state.diagnostics||[],sessions:state.sessions||[],questions}).find(r=>r.skill===task.skill);
- return freshPool(state,questions,history,task.section,task.skill,rank?.stable).slice(0,task.count||5).map(q=>q.id);
+ const rank=rankRoadmapSkills({state,section:task.section,questions,today:task.planDate||localDate()}).find(r=>r.skill===task.skill)||rankSkills({section:task.section,diagnostics:state.diagnostics||[],sessions:state.sessions||[],questions}).find(r=>r.skill===task.skill);
+ return freshPool(state,questions,history,task.section,task.skill,rank?.stable,rank?.domainBand).slice(0,task.count||5).map(q=>q.id);
 }
 export function bindHomeTask(state,key,taskId,reference){
  const item=state.studio?.homePath?.days?.[key]?.tasks.find(item=>item.id===taskId);

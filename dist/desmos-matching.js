@@ -1,4 +1,4 @@
-import {DESMOS_TIPS} from './desmos-content.js?v=9';
+import {DESMOS_TIPS} from './desmos-content.js?v=10';
 const clean=value=>String(value||'').normalize('NFKC').toLowerCase().replace(/[‐‑–—]/g,'-');
 const aliases={'one-variable data: distributions and measures of center and spread':'one-variable data','two-variable data: models and scatterplots':'two-variable data','linear equations in 1 variable':'linear equations in one variable','linear equations in 2 variables':'linear equations in two variables'};
 export const normalizedSkill=value=>aliases[clean(value)]||clean(value);

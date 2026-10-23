@@ -1,0 +1,10 @@
+{
+  "identifier": "main-capability",
+  "description": "Only the bundled local study window. Native commands expose the bounded library picker and signed updater.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default"
+  ]
+}

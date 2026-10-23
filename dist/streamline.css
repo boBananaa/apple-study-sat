@@ -1,4 +1,4 @@
-/* Apple Study: SAT: fewer competing surfaces, one clear next action.
+/* Apple SAT: fewer competing surfaces, one clear next action.
    This layer reuses the established red light/dark tokens from studio.css. */
 .streamlined .rail{width:204px;background:var(--paper);color:var(--ink);border-right:1px solid var(--line);padding:30px 17px 22px;scrollbar-color:var(--line) transparent}
 .streamlined .brand{padding:0 9px;gap:9px;color:var(--ink)}

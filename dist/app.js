@@ -1,12 +1,13 @@
-import {createPathController} from './path-controller.js?v=9';
-import {CONFIDENCE,initializeLearning,markExposure,scheduleRetention,newCorrection,retryCorrection,confidenceSummary,retentionSummary,freshRetentionQuestions,finishRetention,validateLearningRecords,mergeLearningSessions} from './learning-logic.js?v=9';
-import {confidenceMarkup,correctionMarkup,retentionMarkup,calibrationMarkup} from './learning-ui.js?v=9';
-import {addDesmosAssistance,desmosAssistanceCount} from './desmos-matching.js?v=9';
-import {createStudio} from './studio.js?v=9';
-import {initializeStudio,examTaken,importStudio,mergeStudio,recordReview} from './studio-logic.js?v=9';
-import {seedDiagnostics,normalizeDiagnostic,normalizeRoutine} from './planner.js?v=9';
-import {createPlanner} from './planner-ui.js?v=9';
-import {gradeAnswer,checkSetup,stableSession,usedIds,advanceSession} from './logic.js?v=9';
+import {loadDesktopLibrary,startDesktop,isDesktop,saveDesktopBackup} from './desktop.js?v=10';
+import {createPathController} from './path-controller.js?v=10';
+import {CONFIDENCE,initializeLearning,markExposure,scheduleRetention,newCorrection,retryCorrection,confidenceSummary,retentionSummary,freshRetentionQuestions,finishRetention,validateLearningRecords,mergeLearningSessions} from './learning-logic.js?v=10';
+import {confidenceMarkup,correctionMarkup,retentionMarkup,calibrationMarkup} from './learning-ui.js?v=10';
+import {addDesmosAssistance,desmosAssistanceCount} from './desmos-matching.js?v=10';
+import {createStudio} from './studio.js?v=10';
+import {initializeStudio,examTaken,importStudio,mergeStudio,recordReview} from './studio-logic.js?v=10';
+import {seedDiagnostics,normalizeDiagnostic,normalizeRoutine} from './planner.js?v=10';
+import {createPlanner} from './planner-ui.js?v=10';
+import {gradeAnswer,checkSetup,stableSession,usedIds,advanceSession} from './logic.js?v=10';
 
 const KEY='sat-studio-v1';
 const $=s=>document.querySelector(s);
@@ -99,6 +100,7 @@ function stopwatchElapsed(){const w=state?.stopwatch||{elapsed:0,runningSince:nu
 function formatWatch(ms){const total=Math.floor(ms/1000),seconds=String(total%60).padStart(2,'0'),minutes=Math.floor(total/60);return minutes>=60?Math.floor(minutes/60)+':'+String(minutes%60).padStart(2,'0')+':'+seconds:String(minutes).padStart(2,'0')+':'+seconds;}
 function stopwatchMarkup(){return `<section class="stopwatch" aria-label="Stopwatch"><span class="watch-caption">Stopwatch</span><output id="stopwatch-time" aria-label="Elapsed stopwatch time">${formatWatch(stopwatchElapsed())}</output><button class="watch-toggle" data-action="watch-toggle">${state.stopwatch.runningSince?'Pause':'Start'}</button><button class="watch-reset" data-action="watch-reset" aria-label="Reset stopwatch">Reset</button></section>`;}
 function switchSection(section){
+  studio.sectionChanged();
   state.section=section==='Reading and Writing'?'Reading and Writing':'Math';
   filter={search:'',skill:'all',difficulty:'all',page:0};
   const matching=state.sessions.filter(s=>s.section===state.section&&s.type!=='assessment');
@@ -135,7 +137,7 @@ function shell(content){
  const group=groups.find(g=>g.pages.includes(view))||groups[0];
  const labels={practice:'Current session',bank:'Question bank',review:'Review',lessons:'Lessons',tests:'Assessments',vocab:'Vocabulary',challenge:'Desmos week',desmos:'Desmos guides',progress:'History',achievements:'Milestones'};
  const tab=labels[view];
- return `<div class="app-shell streamlined view-${view}"><aside class="rail"><div class="brand"><div class="brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10C10 5 3 10 5 18c1 5 4 10 8 9 2-1 4-1 6 0 4 1 7-4 8-9 2-8-5-13-11-8Z"/><path d="M16 10c0-4-2-6-4-7m4 4c5 0 8-2 8-5-5 0-8 2-8 5Z"/></svg></div><div><span class="brand-name">Apple Study: SAT</span><small>Your personal study room</small></div></div><nav aria-label="Main navigation">${groups.map(g=>`<a href="#${g.id}" class="nav-link ${group.id===g.id?'active':''}" ${group.id===g.id?'aria-current="page"':''}>${icon(g.icon)}${g.name}</a>`).join('')}</nav></aside><main class="workspace"><div class="topbar"><span class="breadcrumb">${esc(group.name)}${tab?' / '+esc(tab):''}</span><div class="top-actions">${group.id==='practice-hub'||group.id==='analysis'?`<label class="section-picker"><span class="sr-only">SAT section</span><select id="section-picker"><option value="Math" ${!reading()?'selected':''}>Math</option><option value="Reading and Writing" ${reading()?'selected':''}>Reading &amp; Writing</option></select></label>`:''}${group.id==='practice-hub'&&view!=='practice-hub'?'<a class="text-button" href="#practice-hub">Back to Practice</a>':''}</div></div>${group.id==='analysis'?'<nav class="section-tabs" aria-label="Analysis views"><a href="#analysis">Overview</a><a href="#progress">History</a><a href="#achievements">Milestones</a></nav>':''}${state.studio.focus?'<div class="focus-banner"><span>Focus session</span><button class="secondary" data-action="focus-toggle">Exit focus</button></div>':''}${!storageOK?'<p class="storage-warning">Progress cannot be saved in this browser. Export before closing.</p>':''}${content}<details class="footer-note"><summary>Sources &amp; saved progress</summary><p>Official questions have PDF citations. Lessons and vocabulary are original study material. Progress stays in this browser; use Settings to export a backup.</p></details></main></div>${stopwatchMarkup()}`;
+ return `<div class="app-shell streamlined view-${view}"><aside class="rail"><div class="brand"><div class="brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10C10 5 3 10 5 18c1 5 4 10 8 9 2-1 4-1 6 0 4 1 7-4 8-9 2-8-5-13-11-8Z"/><path d="M16 10c0-4-2-6-4-7m4 4c5 0 8-2 8-5-5 0-8 2-8 5Z"/></svg></div><div><span class="brand-name">Apple SAT</span><small>Your personal study room</small></div></div><nav aria-label="Main navigation">${groups.map(g=>`<a href="#${g.id}" class="nav-link ${group.id===g.id?'active':''}" ${group.id===g.id?'aria-current="page"':''}>${icon(g.icon)}${g.name}</a>`).join('')}</nav></aside><main class="workspace"><div class="topbar"><span class="breadcrumb">${esc(group.name)}${tab?' / '+esc(tab):''}</span><div class="top-actions">${group.id==='practice-hub'||group.id==='analysis'?`<label class="section-picker"><span class="sr-only">SAT section</span><select id="section-picker"><option value="Math" ${!reading()?'selected':''}>Math</option><option value="Reading and Writing" ${reading()?'selected':''}>Reading &amp; Writing</option></select></label>`:''}${group.id==='practice-hub'&&view!=='practice-hub'?'<a class="text-button" href="#practice-hub">Back to Practice</a>':''}</div></div>${group.id==='analysis'?'<nav class="section-tabs" aria-label="Analysis views"><a href="#analysis">Overview</a><a href="#progress">History</a><a href="#achievements">Milestones</a></nav>':''}${state.studio.focus?'<div class="focus-banner"><span>Focus session</span><button class="secondary" data-action="focus-toggle">Exit focus</button></div>':''}${!storageOK?'<p class="storage-warning">Progress cannot be saved in this browser. Export before closing.</p>':''}${content}<details class="footer-note"><summary>Sources &amp; saved progress</summary><p>Official questions have PDF citations. Lessons and vocabulary are original study material. Progress stays in this browser; use Settings to export a backup.</p></details></main></div>${stopwatchMarkup()}`;
 }
 function header(title,subtitle,action=''){return `<div class="page-title"><div><h1>${title}</h1><p>${subtitle}</p></div>${action}</div>`;}
 function source(q){return `<details class="source"><summary>Official source · ${esc(q.file)} · page ${q.page}</summary><dl><dt>File</dt><dd>${esc(q.file)}</dd><dt>Page</dt><dd>${q.page}</dd><dt>Question</dt><dd>${esc(q.number)}</dd><dt>ID</dt><dd>${esc(q.id)}</dd></dl><p style="margin-top:8px">Verified against your PDF collection.</p></details>`;}
@@ -217,7 +219,7 @@ function submit(revealed=false){
   record.correction=newCorrection(record);
   s.records.push(record);if(s.type!=='retention')scheduleRetention(state.studio,q,record.submittedAt);save();render();document.querySelector('.learning-correction, .feedback')?.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function exportProgress(){const payload={schema:'sat-math-studio-progress-v1',exportedAt:new Date().toISOString(),goal:profile(),section:state.section,stopwatch:state.stopwatch,activeId:state.activeId,sessions:state.sessions,routine:state.routine||null,diagnostics:state.diagnostics||[],studio:state.studio};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='sat-study-progress-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Progress exported. Share the file in your tutoring chat to sync it.');}
+async function exportProgress(){const payload={schema:'sat-math-studio-progress-v1',exportedAt:new Date().toISOString(),goal:profile(),section:state.section,stopwatch:state.stopwatch,activeId:state.activeId,sessions:state.sessions,routine:state.routine||null,diagnostics:state.diagnostics||[],studio:state.studio};if(isDesktop()){try{if(await saveDesktopBackup(payload))toast('Progress backup saved.');}catch(e){toast('Backup could not be saved. Try again.');}return;}const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='sat-study-progress-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Progress exported. Share the file in your tutoring chat to sync it.');}
 function hydrateDraft(form){const d=draft();if(!current())return;const fields=new FormData(form);d.setup=String(fields.get('setup')||'');d.answer=String(fields.get('answer')||'');d.quantity=fields.has('quantity');d.confidence=String(fields.get('confidence')||'');save();}
 document.addEventListener('input',e=>{
   if(e.target.closest('#correction-form')){saveCorrectionDraft(e.target.closest('form'));return;}
@@ -237,7 +239,7 @@ document.addEventListener('change',async e=>{
     try{
       const file=e.target.files[0];if(!file)return;if(file.size>5000000)throw Error('This file is too large for a progress backup.');
       const backup=JSON.parse(await file.text());
-      if(backup.schema!=='sat-math-studio-progress-v1'||!Array.isArray(backup.sessions))throw Error('Choose a Apple Study: SAT progress export.');
+      if(backup.schema!=='sat-math-studio-progress-v1'||!Array.isArray(backup.sessions))throw Error('Choose a Apple SAT progress export.');
       const incoming=backup.sessions;
       const studyTools=backup.studio?importStudio(backup.studio,data.questions):null;
       const routine=backup.routine?normalizeRoutine(backup.routine):null;
@@ -265,6 +267,7 @@ document.addEventListener('click',e=>{
   if(planner.click(action,target))return;
   if(action==='retention-start')return startRetentionCheck(target.dataset.id);
   if(action==='correction-retry'||action==='correction-reveal'||action==='correction-skip'){const r=recordForQuestion();if(!r?.correction)return;r.correction.stage=action==='correction-retry'?'retry':action==='correction-reveal'?'revealed':'skipped';r.correction.updatedAt=new Date().toISOString();if(action==='correction-reveal')r.correction.solutionRevealed=true;save();render();document.querySelector('.learning-correction')?.scrollIntoView({block:'nearest'});return;}
+  if(action==='reload'){location.reload();return;}
   if(action==='export')return exportProgress();
   if(action==='profile')return openProfile();
   if(action==='watch-toggle'){const watch=state.stopwatch;if(watch.runningSince){watch.elapsed=stopwatchElapsed();watch.runningSince=null;}else watch.runningSince=Date.now();save();render();return;}
@@ -293,16 +296,18 @@ let lastPracticeTick=Date.now();
 setInterval(()=>{const now=Date.now(),delta=Math.min(5,Math.max(0,(now-lastPracticeTick)/1000));lastPracticeTick=now;if(state&&view==='practice'&&current()&&!recordForQuestion()&&document.visibilityState==='visible'&&document.hasFocus()){const d=draft();d.activeSeconds=(d.activeSeconds||0)+delta;if(Math.floor(d.activeSeconds)%10===0)save();}if(state?.studio)studio.tick();const clock=$('#stopwatch-time');if(clock&&state)clock.textContent=formatWatch(stopwatchElapsed());const el=$('#timer'),s=active();if(el&&s&&!s.completed){const sec=Math.floor((Date.now()-draft().startedAt)/1000);el.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}},1000);
 async function boot(){
   try{
-    const configuration=await (await fetch('library-config.json')).json();const response=await fetch(configuration.data);if(!response.ok)throw Error('Question library could not load.');data=await response.json();bank=new Map(data.questions.map(q=>[q.id,q]));
+    data=await loadDesktopLibrary();if(!data){const configuration=await (await fetch('library-config.json')).json();const response=await fetch(configuration.data);if(!response.ok)throw Error('Question library could not load.');data=await response.json();}bank=new Map(data.questions.map(q=>[q.id,q]));
     try{state=JSON.parse(localStorage.getItem(KEY)||'null');}catch{storageOK=false;}
     if(!state||state.version!==1||!Array.isArray(state.sessions))state={version:1,sessions:[],activeId:null,section:'Math'};
     state.section=state.section==='Reading and Writing'?'Reading and Writing':'Math';
     state.stopwatch ||= {elapsed:0,runningSince:null};
     initializeStudio(state);
+    for(const id of data.attemptedIds||[])if(bank.has(id))markExposure(state.studio,id);
     for(const session of state.sessions)for(const record of session.records||[])markExposure(state.studio,record.questionId,record.submittedAt||new Date().toISOString());
     if(!Array.isArray(state.diagnostics))state.diagnostics=seedDiagnostics(data.diagnostics||[]);
     for(const s of state.sessions){s.section ||= bank.get(s.questionIds[0])?.section||'Math';s.drafts ||= {};}
+    startDesktop({getState:()=>state,save,toast});
     if(!state.sessions.length&&(location.hash==='#practice')&&data.questions.some(q=>q.section===state.section))newSession(reading()?data.readingFoundationIds:data.foundationIds,'foundation');else render();
-  }catch(error){$('#app').innerHTML=`<div class="loading"><div><h1>Your library could not load.</h1><p>${esc(error.message)}</p><button class="primary" onclick="location.reload()" style="margin-top:20px">Try again</button></div></div>`;}
+  }catch(error){$('#app').innerHTML=`<div class="loading"><div><h1>Your library could not load.</h1><p>${esc(error.message)}</p><button class="primary" data-action="reload" style="margin-top:20px">Try again</button></div></div>`;}
 }
 boot();

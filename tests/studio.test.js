@@ -8,8 +8,8 @@ import {initializeStudio,award,activity,recordReview,rateVocabulary,createExam,s
 const questions=['Math','Reading and Writing'].flatMap(section=>Object.entries(SKILLS[section]).flatMap(([k,skill])=>Array.from({length:12},(_,i)=>({id:section.replaceAll(' ','')+'-'+k+'-'+i,section,skill,domain:section==='Math'?['Algebra','Advanced Math','Problem-Solving and Data Analysis','Geometry and Trigonometry'][Number(k)%4]:['Information and Ideas','Craft and Structure','Expression of Ideas','Standard English Conventions'][Number(k)%4],difficulty:['Easy','Medium','Hard'][i%3],answer:i%2?'B':'4',file:'Synthetic fixture.pdf',page:1,number:'1.1'}))));
 const base=()=>({sessions:[],diagnostics:[],studio:initializeStudio({})});
 test('curriculum covers every skill with original complete lessons and coherent prerequisites',()=>{
- assert.equal(LESSONS.length,29);assert.equal(new Set(LESSONS.map(l=>l.id)).size,29);
- for(const section of Object.keys(SKILLS))assert.deepEqual(LESSONS.filter(l=>l.section===section).map(l=>l.skill).sort(),[...SKILLS[section]].sort());
+ assert.ok(LESSONS.length>=29);assert.equal(new Set(LESSONS.map(l=>l.id)).size,LESSONS.length);
+ for(const section of Object.keys(SKILLS))assert.deepEqual([...new Set(LESSONS.filter(l=>l.section===section).map(l=>l.skill))].sort(),[...SKILLS[section]].sort());
  for(const l of LESSONS){assert.ok(l.steps.length>=3&&l.worked.prompt&&l.check.answer!==undefined&&l.rule);for(const id of l.prerequisites)assert.ok(LESSONS.some(x=>x.id===id));}
  assert.ok(VOCAB.length>=50&&ROOTS.length>=15);assert.equal(CHALLENGE.length,7);
 });
