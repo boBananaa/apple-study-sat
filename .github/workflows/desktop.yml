@@ -2,7 +2,6 @@ name: Desktop release
 on:
   push:
     branches: [main]
-    paths: ['dist/**', 'src-tauri/**', 'scripts/release-version.mjs', 'package.json', 'package-lock.json', 'tests/**', '.github/workflows/desktop.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -74,5 +73,11 @@ jobs:
       - name: Publish only after both platform builds pass
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release edit "${{ steps.version.outputs.tag }}" --draft=false --latest --repo "$GITHUB_REPOSITORY"
+        run: |
+          current=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [ "$current" != "$GITHUB_SHA" ]; then
+            echo "A newer source push is queued; retain this release as a draft."
+            exit 0
+          fi
+          gh release edit "${{ steps.version.outputs.tag }}" --draft=false --latest --repo "$GITHUB_REPOSITORY"
 

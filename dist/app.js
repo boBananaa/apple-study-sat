@@ -1,3 +1,4 @@
+import {normalizeBackupMetadata,mergeImportedHistory} from './backup-meta.js?v=10';
 import {loadDesktopLibrary,startDesktop,isDesktop,saveDesktopBackup} from './desktop.js?v=10';
 import {createPathController} from './path-controller.js?v=10';
 import {CONFIDENCE,initializeLearning,markExposure,scheduleRetention,newCorrection,retryCorrection,confidenceSummary,retentionSummary,freshRetentionQuestions,finishRetention,validateLearningRecords,mergeLearningSessions} from './learning-logic.js?v=10';
@@ -219,7 +220,7 @@ function submit(revealed=false){
   record.correction=newCorrection(record);
   s.records.push(record);if(s.type!=='retention')scheduleRetention(state.studio,q,record.submittedAt);save();render();document.querySelector('.learning-correction, .feedback')?.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-async function exportProgress(){const payload={schema:'sat-math-studio-progress-v1',exportedAt:new Date().toISOString(),goal:profile(),section:state.section,stopwatch:state.stopwatch,activeId:state.activeId,sessions:state.sessions,routine:state.routine||null,diagnostics:state.diagnostics||[],studio:state.studio};if(isDesktop()){try{if(await saveDesktopBackup(payload))toast('Progress backup saved.');}catch(e){toast('Backup could not be saved. Try again.');}return;}const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='sat-study-progress-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Progress exported. Share the file in your tutoring chat to sync it.');}
+async function exportProgress(){const payload={schema:'sat-math-studio-progress-v1',exportedAt:new Date().toISOString(),goal:profile(),section:state.section,history:priorHistory(),stopwatch:{elapsed:stopwatchElapsed(),runningSince:null},activeId:state.activeId,sessions:state.sessions,routine:state.routine||null,diagnostics:state.diagnostics||[],studio:state.studio};if(isDesktop()){try{if(await saveDesktopBackup(payload))toast('Progress backup saved.');}catch(e){toast('Backup could not be saved. Try again.');}return;}const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='sat-study-progress-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Progress exported. Share the file in your tutoring chat to sync it.');}
 function hydrateDraft(form){const d=draft();if(!current())return;const fields=new FormData(form);d.setup=String(fields.get('setup')||'');d.answer=String(fields.get('answer')||'');d.quantity=fields.has('quantity');d.confidence=String(fields.get('confidence')||'');save();}
 document.addEventListener('input',e=>{
   if(e.target.closest('#correction-form')){saveCorrectionDraft(e.target.closest('form'));return;}
@@ -239,8 +240,9 @@ document.addEventListener('change',async e=>{
     try{
       const file=e.target.files[0];if(!file)return;if(file.size>5000000)throw Error('This file is too large for a progress backup.');
       const backup=JSON.parse(await file.text());
-      if(backup.schema!=='sat-math-studio-progress-v1'||!Array.isArray(backup.sessions))throw Error('Choose a Apple SAT progress export.');
+      if(backup.schema!=='sat-math-studio-progress-v1'||!Array.isArray(backup.sessions))throw Error('Choose an Apple SAT progress export.');
       const incoming=backup.sessions;
+      const meta=normalizeBackupMetadata(backup);
       const studyTools=backup.studio?importStudio(backup.studio,data.questions):null;
       const routine=backup.routine?normalizeRoutine(backup.routine):null;
       const diagnostics=(backup.diagnostics||[]).map(normalizeDiagnostic);
@@ -248,8 +250,13 @@ document.addEventListener('change',async e=>{
       for(const s of incoming){if(typeof s.id!=='string'||!Array.isArray(s.questionIds)||!Array.isArray(s.records)||s.questionIds.some(id=>!bank.has(id)||bank.get(id).section!==s.section)||s.records.some(r=>!bank.has(r.questionId)||!s.questionIds.includes(r.questionId))||!Number.isInteger(s.index)||s.index<0||s.index>=s.questionIds.length)throw Error('This backup contains invalid session data.');}
       validateLearningRecords(incoming);
       const mergedSessions=mergeLearningSessions(state.sessions,incoming);
+      const mergedTools=studyTools?mergeStudio(state.studio,studyTools):state.studio;
       state.sessions=mergedSessions;
-      if(studyTools)state.studio=mergeStudio(state.studio,studyTools);
+      state.studio=mergedTools;
+      state.importedHistory=mergeImportedHistory(state.importedHistory,meta.history);
+      if(meta.profile)state.profile=meta.profile;
+      if(meta.stopwatch)state.stopwatch=meta.stopwatch;
+      if(meta.section)state.section=meta.section;
       if(routine)state.routine=routine;
       state.diagnostics=[...new Map([...(state.diagnostics||[]),...diagnostics].map(d=>[d.id,d])).values()];
       if(!state.activeId&&incoming.length)state.activeId=incoming[0].id;

@@ -20,8 +20,8 @@ export function createPathController(context){
  function taskView(task,next){return {...task,...(task.status!=='complete'&&task.sessionId?{title:'Continue your saved set',description:'Your place, first answers, and hints are saved.'}:{}),state:task.status==='complete'?'done':task.status==='blocked'?'blocked':task.id===next?.id?'current':'available',meta:[task.section,task.count?task.count+' questions':task.minutes?task.minutes+' min':''].filter(Boolean).join(' · ')};}
  function home(){
   const m=model(),p=getProfile(),dated=m.calendarEnabled;
+  if(results.isAdding())return `<div class="path-home"><header class="path-page-heading"><h1>Update your official results</h1></header>${results.form()}</div>`;
   if(!m.gate.ready)return results.gate(m);
-  if(results.isAdding())return `<div class="path-home">${results.form()}</div>`;
   const weeks=new Map();
   for(const day of m.upcoming){const week=addDays(day.date,-((new Date(day.date+'T12:00:00Z').getUTCDay()+6)%7));if(!weeks.has(week))weeks.set(week,{id:week,label:'Week of '+pretty(week),days:[]});weeks.get(week).days.push({id:day.key,dateLabel:pretty(day.date,{weekday:'short',month:'short',day:'numeric'}),title:day.tasks.some(t=>t.kind==='official-checkpoint')?'Official Bluebook practice test':day.section+' practice',description:'The recommendation adapts to your results.',state:'upcoming',tasks:day.tasks.filter(t=>t.kind!=='bank-setup').slice(0,2).map(t=>({title:t.title,meta:t.section}))});}
   const visibleTasks=m.tasks.length>3?[...m.tasks.filter(t=>t.status==='complete').slice(-2),...m.tasks.filter(t=>t.status!=='complete').slice(0,1)]:m.tasks;
