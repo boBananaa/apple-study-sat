@@ -1,65 +1,100 @@
-# Apple SAT
+<p align="center"><img src="dist/apple-study.svg" width="64" height="64" alt=""></p>
 
-**Know what to study next.** A free, open-source desktop app for Mac and Windows that turns your latest official SAT results into a daily study path.
+<h1 align="center">Apple SAT</h1>
 
-[**Download Apple SAT**](https://bobananaa.github.io/apple-study-sat/#download) · [Latest release](https://github.com/boBananaa/apple-study-sat/releases/latest) · [How it works](https://bobananaa.github.io/apple-study-sat/#study)
+<p align="center"><strong>Know what to study next.</strong><br>A free desktop study room for Digital SAT Math and Reading and Writing.<br>Turn your official results into a daily path of lessons, practice, and review.</p>
 
-![Apple SAT daily roadmap with an example profile](docs/screenshots/roadmap.png)
+<p align="center"><a href="https://bobananaa.github.io/apple-study-sat/#download"><strong>Download for Mac or Windows →</strong></a><br><a href="docs/GETTING_STARTED.md">Getting started</a> · <a href="https://github.com/boBananaa/apple-study-sat/releases/latest">Release notes</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
 
-*Screenshots use an example profile, not a real student's results.*
+<p align="center"><a href="https://github.com/boBananaa/apple-study-sat/releases/latest"><img src="https://img.shields.io/github/v/release/boBananaa/apple-study-sat?display_name=tag&amp;label=release&amp;color=9f3349" alt="Latest published desktop release"></a> <a href="https://github.com/boBananaa/apple-study-sat/actions/workflows/desktop.yml"><img src="https://github.com/boBananaa/apple-study-sat/actions/workflows/desktop.yml/badge.svg?branch=main" alt="Desktop build and checks status"></a></p>
 
-## A plan grounded in your results
+![Apple SAT Home: an example official report becomes a short daily path with a next lesson and practice step](docs/screenshots/roadmap.png)
 
-Enter the section scores and eight domain bands from one actual SAT or official Bluebook practice test. Apple SAT focuses the path on weaker areas, then uses fresh-question results to refine the skill and difficulty. Haven’t taken a test? Start with the official Bluebook test linked in Home.
+*Actual app, example profile. Screenshots do not show a real student's results.*
 
-- **A manageable day:** one Continue button, a short lesson/practice/review sequence, and saved-session resume.
-- **Both SAT sections:** 111 original lessons covering all 29 question-bank skills, with worked examples, traps, recognition rules, and checks.
-- **Learn Desmos by applying it:** 32 methods, each with its own original practice question and a setup before the answer.
-- **Check progress over time:** periodic official Bluebook checkpoints refresh the roadmap until your test date or until you pause them because you’re happy with your practice score.
-- **Question Rush:** short timed rounds in both sections, with pace choices, accuracy, streaks, and speed stars. Misses go to Review; speed scores do not establish setup mastery.
-- **Practice honestly:** first answers, hints, corrections, confidence, and delayed fresh checks stay distinct. No invented mastery or predicted SAT scores.
-- **Keep your study room local:** stopwatch, scratchpad, question annotations, vocabulary, and backups. No account, server, subscription, or AI API key required.
-
-<details>
-<summary>See lessons and Desmos practice</summary>
-
-![An original quadratic lesson](docs/screenshots/lessons.png)
-
-![A Desmos method with its application exercise](docs/screenshots/desmos.png)
-
-</details>
+**No account, subscription, or AI API key.** Lessons and Desmos exercises are included. Official question-bank material is **not bundled**; question practice and Question Rush use a compatible library you import yourself. Preparing that library currently requires Python and the repository's PDF importer.
 
 ## Download and start
 
-Choose the **Mac universal** installer for Apple Silicon or Intel, or the **Windows** installer. These early builds are not Apple-notarized or Windows publisher-signed; they are labeled as preview releases. Update packages have their own verification signatures.
+1. **[Download the desktop app](https://bobananaa.github.io/apple-study-sat/#download).** Choose the universal `.dmg` for an Apple Silicon or Intel Mac, or the x64 `setup.exe` for Windows 10/11. The GitHub **Code → Download ZIP** button downloads source code, not an installer.
+2. **Get one useful result.** Open **Practice → Lessons and study tools → Lessons**, choose Math or Reading and Writing, and complete one original lesson check. You can do this before importing any questions.
+3. **Build your roadmap.** In **Home**, enter the two section scores and eight domain bands from one official SAT or full-length Bluebook report. Add your target, next test date, and routine. Your next study step appears on Home. Haven't taken an official test? Home links to Bluebook; lessons remain available meanwhile.
 
-1. Install the app and enter your latest official test report in Home.
-2. Set your target, next SAT date, available time, and study days.
-3. Follow the next step. Enter a new official practice report at each checkpoint.
+**Early preview:** installers are not Apple-notarized or Windows publisher-signed. Update packages use a separate verification signature. Mac updating has been exercised from 0.2.3 to 0.2.4; Windows builds and native tests pass in CI, but Windows interface and installation testing remain unverified.
 
-Lessons and Desmos exercises are included. **Official question-bank PDFs are not bundled.** To practice your own questions, use the [PDF importer](docs/DEVELOPMENT.md#load-your-own-pdf-question-bank), then choose **Settings → Desktop app → Import prepared question library**. Bring existing browser progress over with an exported backup. Imported library attempt IDs stay excluded from fresh practice; full results move through progress backups.
+[First-use guide and troubleshooting](docs/GETTING_STARTED.md) · [Prepare your question library](docs/DEVELOPMENT.md#load-your-own-pdf-question-bank)
 
-## Automatic updates
+## A plan grounded in your results
 
-Successful app-source pushes to `main` build Mac and Windows installers and publish a new GitHub Release. Installed apps check on launch and every six hours, verify the update signature, and install outside an exercise before restarting. Reports, progress, and imported libraries are stored separately from the app bundle. Offline study continues when updates cannot be checked.
+One place to decide what comes next, with four main tabs: **Home · Practice · Analysis · Settings**.
 
-GitHub Pages is the download and information page. It does not store study data or run the app's learning engine. A future hosted app can be developed separately.
+| Study tool | What it helps you do |
+| --- | --- |
+| **Your daily path** | Prioritize weaker areas from your official report, then refine the next skill and difficulty using fresh practice. Periodic Bluebook checkpoints refresh the plan. |
+| **111 original lessons** | Cover all 29 question-bank skills: 73 Math lessons and 38 Reading and Writing lessons, with worked examples, traps, and recognition rules. |
+| **Setup-first practice** | Write an equation or reasoning before answering. Keep first answers, hints, corrections, confidence, and delayed fresh checks distinct. |
+| **32 Desmos methods** | Learn when a calculator shortcut applies, then try an original application question for each method. |
+| **Question Rush** | Train pacing with 5-, 10-, or 20-question rounds, pace choices, and optional stars and streaks. Timed rounds unlock after two stable practice sets; speed results stay separate from setup mastery. |
+| **Review and study tools** | Rework misses, check retention later with fresh questions, use the stopwatch and scratchpad, or review vocabulary. |
 
-## Privacy and accuracy
+### See the study room
 
-Your scores, notes, and practice history stay on your device unless you export them. They do not sync to this repository. Keep private backups and question material out of public forks. Only redistribute materials you have permission to share.
+<details>
+<summary><strong>Lessons — learn a method before the next question</strong></summary>
 
-Official reports provide broad domain bands, not exact-skill accuracy. Practice scores can differ from test-day scores in either direction. Apple SAT is independent of College Board, Khan Academy, Apple, and Dolphin. Lessons are originally authored, with scope checked against [College Board's framework](https://satsuite.collegeboard.org/media/pdf/assessment-framework-for-digital-sat-suite.pdf) and its [Khan Academy course guidance](https://satsuite.collegeboard.org/practice/khan-academy). The app does not guarantee a score increase.
+![An original quadratic lesson explains a worked example, a recognition rule, and a check for understanding](docs/screenshots/lessons.png)
+
+Lesson checks are tutorial practice; completing one does not establish mastery.
+
+</details>
+
+<details>
+<summary><strong>Desmos — learn a shortcut, then apply it</strong></summary>
+
+![A Desmos method includes a setup-first original application exercise](docs/screenshots/desmos.png)
+
+Original exercises are labeled separately from official PDF questions.
+
+</details>
+
+<details>
+<summary><strong>Question Rush — choose a focus and a pace</strong></summary>
+
+![Question Rush setup for Reading and Writing shows skill, difficulty, question count, pace, and an accuracy target](docs/screenshots/rush.png)
+
+This capture uses a locally imported sample library and disposable test records. Question libraries are not included in the download.
+
+</details>
+
+## Your progress stays on your computer
+
+- **Study offline after installation.** Updates and external resources such as Bluebook, Khan Academy, and Desmos need an internet connection.
+- **Back up what matters.** Export from **Settings → Question library and backups**. Import that backup to move progress to another installation; there is no automatic cloud sync.
+- **Bring your own questions.** The [PDF importer](docs/DEVELOPMENT.md#load-your-own-pdf-question-bank) prepares supported question-bank PDFs. Import its output folder through the desktop Settings. Earlier attempted IDs remain excluded from fresh practice.
+- **Keep expectations realistic.** Domain bands cover several skills, not exact-skill accuracy. App simulations and Rush results are not calibrated SAT scores. Practice and test-day scores can differ in either direction; no score increase is guaranteed.
+
+Installed apps check for updates on launch and every six hours. A successful push to `main` builds both platforms; only a completed release is published. The app verifies its update signature and installs outside an exercise before restarting. Imported libraries and study data are stored separately from the app bundle. [How releases work](docs/RELEASING.md).
+
+## Help and feedback
+
+Start with [setup and troubleshooting](docs/GETTING_STARTED.md#troubleshooting). If you're still stuck, [open an issue](https://github.com/boBananaa/apple-study-sat/issues/new/choose) with your operating system, app version, expected result, and steps to reproduce it. Don't attach personal score reports, progress backups, credentials, or question PDFs. Use sample data in screenshots.
 
 ## Build or contribute
 
-Node.js 22+ and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) are needed for desktop development.
+For a local desktop build, install Node.js 22+, Rust, and the [Tauri platform prerequisites](https://v2.tauri.app/start/prerequisites/). From the repository root:
 
 ```sh
 npm ci
 npm test
 npm run desktop:dev
-npm run desktop:build
 ```
 
-[Developer guide and PDF import](docs/DEVELOPMENT.md) · [Release and update setup](docs/RELEASING.md) · [MIT license](LICENSE)
+**Expected result:** a local Apple SAT desktop window with lessons and an empty question library. Packaging installers uses `npm run desktop:build`; signing and cross-platform release setup are separate.
+
+[Contribution guide](CONTRIBUTING.md) · [Developer guide and PDF importer](docs/DEVELOPMENT.md) · [Release setup](docs/RELEASING.md)
+
+## License and credits
+
+Application code is provided under the [MIT license](LICENSE). That license does not grant rights to imported question PDFs, images, answer keys, or trademarks. Bundled fonts retain their [own license notices](dist/fonts/).
+
+Apple SAT is an independent project, not affiliated with or endorsed by College Board, Khan Academy, Desmos, or Apple. Lessons are originally authored; their scope references [College Board's assessment framework](https://satsuite.collegeboard.org/media/pdf/assessment-framework-for-digital-sat-suite.pdf) and its [Khan Academy course guidance](https://satsuite.collegeboard.org/practice/khan-academy). GitHub Pages is this project's download page; the study app runs on your computer.

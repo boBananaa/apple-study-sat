@@ -1,10 +1,10 @@
-# Apple SAT
+# Developer guide
 
-A free, open-source practice room for Digital SAT Math and Reading and Writing. It runs as a static website with no API key, database, or AI service required.
+Apple SAT is a free desktop study app for Digital SAT Math and Reading and Writing, built with a local web frontend and Tauri. No AI service, API key, database, or study-progress server is required.
 
-[Open the public app](https://bobananaa.github.io/apple-study-sat/)
+[Download the desktop app](https://bobananaa.github.io/apple-study-sat/#download) · [First-use guide](GETTING_STARTED.md) · [Contribute](../CONTRIBUTING.md)
 
-The public app includes lessons, vocabulary, planning, and a stopwatch. Official practice questions are not bundled. Clone the repository and import your own supported PDF bank for question practice.
+GitHub Pages serves the download page in `site/`. The study app frontend is `dist/`; it can also be served locally for frontend development. Native library import and signed updates require the desktop app. The clean source includes original lessons and an empty question library.
 
 ## Features
 
@@ -18,13 +18,23 @@ The public app includes lessons, vocabulary, planning, and a stopwatch. Official
 
 ## Start locally
 
-Use Python 3.10 or later. No JavaScript installation or build step is needed.
+For desktop development, install Node.js 22+, Rust, and the [Tauri platform prerequisites](https://v2.tauri.app/start/prerequisites/). From the repository root:
+
+```sh
+npm ci
+npm test
+npm run desktop:dev
+```
+
+The expected result is a desktop window with included lessons and an empty question bank. See [release setup](RELEASING.md) for platform packaging, signing, and updates.
+
+For a browser-only frontend preview, use Python 3.10 or later. This route does not provide native import or update commands:
 
 ```sh
 python -m http.server 8000 --directory dist
 ```
 
-Open `http://localhost:8000`. Open **Settings** to enter scores, a goal, and a test date. The clean edition starts without personal information or question material.
+Open `http://localhost:8000`. Open **Home** to enter an official report, or **Practice** to browse included lessons. The clean edition starts without personal information or question material.
 
 ## Load your own PDF question bank
 
@@ -49,7 +59,7 @@ python scripts/import_pdf_bank.py --pdf-root "/path/to/SAT Question Bank PDFs" -
 python scripts/import_pdf_bank.py --pdf-root "/path/to/SAT Question Bank PDFs"
 ```
 
-The importer replaces `dist/data.json` and writes question assets under `dist/assets/`. It does not import a personal profile or tutoring history. Set up the profile through the website, and import history there if desired. Refresh after importing a library.
+The importer replaces `dist/data.json` and writes question assets under `dist/assets/`. It does not import a personal profile or tutoring history. For a desktop library, choose this output folder (`dist` by default) in **Settings → Desktop app → Import prepared question library**. The app copies the validated data and assets into its local data directory. For a browser preview, refresh after preparing the library. Personal profiles and full history move through the separate progress flow.
 
 The app uses supplied answer keys rather than generated answers. Most setups and all Reading and Writing reasoning use a self-check against the provided solution; free-form reasoning is not automatically graded. Generic hints are skill guidance, not live AI tutoring.
 
@@ -68,7 +78,7 @@ Open **Settings → Question library and backups → Import or edit a profile �
 }
 ```
 
-Replace null values with your own information. Section scores range from 200 to 800, the target ranges from 400 to 1600, and the date uses `YYYY-MM-DD`. Recognized earlier question IDs are excluded from fresh practice. Export progress from **Settings → Question library and backups** to move website sessions to another browser or share them with a tutor.
+This profile import restores preferences and earlier attempted IDs; it does not satisfy the complete official-report requirement for a roadmap. Enter the two section scores and eight domain bands in Home. Replace null values with your own information. Section scores range from 200 to 800, the target ranges from 400 to 1600, and the date uses `YYYY-MM-DD`. Recognized earlier question IDs are excluded from fresh practice. Export progress from **Settings → Question library and backups** to move website sessions to another browser or share them with a tutor.
 
 ## Privacy and publishing
 
@@ -80,7 +90,7 @@ Only upload or redistribute question material you have permission to use. The so
 
 ## Tests and hosting
 
-JavaScript logic tests use Node.js 20 or later:
+JavaScript logic tests use Node.js 22 or later:
 
 ```sh
 node --test tests/*.test.js
@@ -90,23 +100,23 @@ For hosting, serve the `dist/` directory with any static host. No secrets are re
 
 ## Adaptive study routines
 
-Open **Settings** to enter diagnostic correct/total counts for Math or Reading and Writing, select study days and minutes, and enter your next SAT date. New installations start with no diagnostic or personal data. Diagnostic JSON import uses the downloadable template in that section. Screenshots and PDFs are not automatically read.
+Home requires the latest single-sitting report from an actual SAT or full-length official Bluebook SAT practice test: source, date, two section scores, and eight domain bands. Official reports are entered manually; screenshots and PDFs are not parsed. A profile, superscore, or unofficial skill diagnostic does not substitute for this baseline. Included lessons remain accessible before a report is added.
 
-Plans use the most recent diagnostic per skill and up to ten subsequent practice answers. An answer counts as independent only when correct, without hints/reveal, and with a valid setup or self-checked reasoning. Small diagnostic samples are shrunk toward 50%; priorities spread practice among weak and untested skills. No scaled-score prediction is made. Hard practice requires stable skill results and a completed stable set; pace targets require two stable sets.
+The eight domain bands set broad starting priorities. `results-logic.js` combines domain weakness with observed practice or optional skill-diagnostic evidence, rather than inventing exact-skill accuracy from a domain band. Subsequent fresh practice helps choose specific skills and difficulty. An independent practice answer must be correct, unassisted, supported by a valid setup or self-checked reasoning, and not a guess. Hard readiness and timed readiness are separate checks.
 
-Home shows a short daily sequence with one Continue action: resume saved work, rework an earlier question, take a due fresh check, or study a priority skill. Its length respects the daily time budget. Completing a step keeps the original sequence intact; new diagnostics or library changes can adjust work you have not started. Completed work is retained.
+Home presents a short lesson/practice/review sequence and one Continue action. Study days, minutes, target, and section focus are controlled in Settings. A future test date enables calendar previews; no date yields an undated starting point. On or after the test date, update it before generating more calendar days. Future previews are tentative and reserve no questions until practice starts. Completed work remains intact.
 
-A real future test date enables read-only previews on selected study days, up to fourteen upcoming days. Without a date, Home offers an undated starting point. Future previews are tentative and do not reserve questions. Fresh IDs are chosen and checked again only when practice starts. Estimates may differ from actual study time.
+Official practice checkpoints default to about every 14 days and can be spaced 7, 14, 21, or 28 days apart. A full checkpoint occupies its own day with 144 minutes including the break; it is not squeezed into an ordinary short study session. Checkpoints continue after lessons are reviewed, until the next test date or until the user pauses them after becoming satisfied with a practice score. New official results refresh priorities. No full test is scheduled in the final three days.
 
-Routine preferences, diagnostics, and session results remain in browser storage and are included in progress exports/imports. No AI service, API key, or cloud progress sync is used. Editing or deleting a diagnostic rebuilds future recommendations; completed sessions are retained.
+Additional skill diagnostics can inform follow-up practice but remain distinct from official reports. Routine preferences, reports, diagnostics, and progress stay in local storage and are included in progress backups. There is no calibrated SAT-score prediction or automatic cloud sync.
 
 ## Learning studio
 
-The interface includes an adaptive learning path, 29 original skill lessons, worked examples and checks, a correction queue with spaced review, saved questions and scratch notes, persistent question highlights and eliminated choices, calculator and a local arithmetic graph plotter, 60 vocabulary cards, 18 roots, a seven-day Desmos challenge, personal XP/streaks/milestones, and light/dark/focus modes. Tutorial content is explicitly separate from official PDF question-bank material. Unlimited practice is limited only by the unused questions in the user's library.
+The interface includes an adaptive learning path, 111 original lessons across all 29 question-bank skills, worked examples and checks, a correction queue with spaced review, saved questions and scratch notes, persistent question highlights and eliminated choices, calculator and a local arithmetic graph plotter, 60 vocabulary cards, 18 roots, a seven-day Desmos challenge, personal XP/streaks/milestones, and light/dark/focus modes. Tutorial content is explicitly separate from official PDF question-bank material. Unlimited practice is limited only by the unused questions in the user's library.
 
 **Assessments:** a 12-question diagnostic per selected section; Math or Reading and Writing simulations with two modules; full 98-question SAT simulation (four modules plus a 10-minute break); standard, 1.5x, or 2x practice timing. Timers use persisted deadlines and continue across reloads. Answers may be revisited within the current module and flagged for review; submitting or timing out locks a module. Module 2 uses this app's 65% accuracy threshold to select a harder or support question mix. Questions are balanced approximately by domain and never reused in fresh practice or other reserved assessments.
 
-These are assembled practice simulations, not College Board tests or calibrated SAT scores. Reports show raw accuracy and per-skill diagnostics; setups are not collected during assessments and do not unlock setup mastery. Use Bluebook for official full-length checkpoints. Official/self-reported score checkpoints can be entered manually in Analysis; screenshots and PDFs are not automatically parsed.
+These are assembled practice simulations, not College Board tests or calibrated SAT scores. Reports show raw accuracy and per-skill diagnostics; setups are not collected during assessments and do not unlock setup mastery. Use Bluebook for official full-length checkpoints. Complete official report checkpoints are entered through Home or Settings. Legacy self-reported Analysis checkpoints do not satisfy the official-report gate; screenshots and PDFs are not automatically parsed.
 
 **Persistence:** progress exports include all study tools, notes, saved items, vocabulary spacing, lessons, exams and routines. Imports validate question IDs and preserve distinct work. Everything is browser-local. Personal best weeks are a personal leaderboard; there is no fabricated global competition or multi-user cloud service.
 
@@ -116,7 +126,7 @@ These are assembled practice simulations, not College Board tests or calibrated 
 
 ## Navigation
 
-The four main tabs are **Home**, **Practice**, **Analysis**, and **Settings**. Home is the guided daily path. Practice offers skill practice, review, and assessments, with lessons, Desmos guides, and vocabulary under a closed study-tools section. Analysis contains performance, attempt history, and milestones. Settings holds the routine, diagnostics, profile, theme, library setup, and backups. The stopwatch stays available across the app.
+The four main tabs are **Home**, **Practice**, **Analysis**, and **Settings**. Home is the guided daily path. Practice offers skill practice, Question Rush, review, and assessments, with lessons, Desmos guides, and vocabulary under a closed study-tools section. Analysis contains performance, attempt history, and milestones. Settings holds the routine, diagnostics, profile, theme, library setup, and backups. The stopwatch stays available across the app.
 
 ## Desmos question tips
 
@@ -158,3 +168,9 @@ Run `npm test`, `python scripts/check_public_source.py`, and the Python tests be
 Delayed checks appear on Home when due and under Practice → Review. Their dates are independent of the calendar routine. Merely displaying a question marks it exposed for future fresh selection, including in an assessment that is later archived. Progress backups include this exposure history, correction attempts, confidence, and delayed-check evidence. Equal-length session imports can merge correction progress while preserving first attempts.
 
 Without an imported question library, the app clearly offers bank setup instead of promising a five-question practice session. Lessons and vocabulary remain available. Both Math and Reading and Writing use the same learning evidence rules.
+
+## Question Rush
+
+`rush-logic.js` and `rush-ui.js` implement 5-, 10-, and 20-question pacing rounds in either section. Two stable untimed practice sets unlock timing; Hard retains its separate gate. Per-question deadlines persist across reloads and absences. A timeout enters feedback without starting another clock; Next is explicit. Correct answers earn speed stars, while wrong answers, skips, and timeouts reset the streak. Focused view hides game details.
+
+Rounds live in `studio.rushRounds`, outside ordinary practice sessions and mastery calculations. Active rounds reserve their selected IDs; ended rounds retain exposure exclusions and release unseen questions. Results preserve first answers and source citations, feed missed or ended unanswered items into Review, and validate/merge through progress backups. Speed results appear separately in Analysis.
