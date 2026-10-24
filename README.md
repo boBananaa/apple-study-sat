@@ -1,4 +1,4 @@
-<p align="center"><img src="dist/apple-study.svg" width="64" height="64" alt=""></p>
+<p align="center"><img src="docs/apple-sat-mark.svg" width="64" height="64" alt=""></p>
 
 <h1 align="center">Apple SAT</h1>
 
