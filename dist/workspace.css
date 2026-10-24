@@ -1,0 +1,65 @@
+/* Shared compact navigation and a work-first Home layout. Loaded after feature styles. */
+.compact-shell.app-shell{display:block;min-height:100vh}
+.compact-shell .app-header{position:relative;inset:auto;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:32px;width:100%;padding:16px max(28px,calc((100vw - 1200px)/2));border:0;border-bottom:1px solid var(--line);background:var(--paper)}
+.compact-shell .brand{display:flex;align-items:center;gap:10px;flex-shrink:0;padding:0;margin:0}
+.compact-shell .brand-mark{width:31px;height:35px}
+.compact-shell .brand-name{font-size:17px;line-height:1.4;white-space:nowrap}
+.compact-shell .brand small{font-size:10px;line-height:1.5;margin-top:1px}
+.compact-shell .app-header nav{display:flex;gap:7px;margin:0;padding:0}
+.compact-shell .nav-link{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:10px 17px;border-radius:8px;font-size:13px;white-space:nowrap}
+.compact-shell .workspace{width:100%;max-width:1200px;min-width:0;margin:0 auto;padding:20px 28px 92px}
+.compact-shell .topbar{margin:0 0 20px;padding:0 0 14px;min-height:36px;gap:16px}
+.compact-shell .path-home{max-width:none;padding-top:0}
+.compact-shell .results-basis{max-width:none;margin:0 auto 22px;padding-bottom:16px;gap:8px 20px}
+.compact-shell .path-page-heading{margin-bottom:24px;gap:20px}
+.compact-shell .path-page-heading h1{font-size:30px;letter-spacing:-1px}
+.path-workspace{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+.path-current,.path-upcoming{min-width:0}
+.path-current-day::before,.path-current-day>.path-today-stop>.path-line-node{display:none}
+.path-current-day>.path-today-stop{padding-left:0}
+.compact-shell .path-today{border-radius:12px}
+.compact-shell .path-today-header{padding:22px 24px 16px}
+.compact-shell .path-today-date{margin-bottom:10px}
+.compact-shell .path-today-header h2{font-size:23px;max-width:34ch}
+.compact-shell .path-today-header p{line-height:1.65;margin-top:8px}
+.compact-shell .path-task-list{padding:0 14px}
+.compact-shell .path-task>button,.compact-shell .path-task-static{min-height:82px;padding:15px 10px;gap:12px}
+.compact-shell .path-today-footer{padding:16px 24px 22px}
+.compact-shell .path-today-footer .path-continue{min-width:126px;min-height:43px;padding:11px 24px}
+.path-upcoming{padding:18px 20px;background:var(--paper);border:1px solid var(--line);border-radius:12px;--path-indent:25px}
+.path-upcoming>h2{font:750 16px/1.5 Manrope,sans-serif;margin:0}
+.path-upcoming-intro{font-size:12px;line-height:1.65;color:var(--muted);margin:6px 0 10px}
+.path-upcoming .study-path::before{top:30px;bottom:38px;left:4px;width:1px}
+.path-upcoming .path-line-node{width:10px;height:10px;left:0;background:var(--paper)}
+.path-upcoming .path-week-stop{padding-top:0}
+.path-upcoming .path-week-stop .path-line-node{top:25px}
+.path-upcoming .path-week>summary{padding:18px 0;gap:8px;align-items:start}
+.path-upcoming .path-week>summary strong{font-size:13px;line-height:1.5}
+.path-upcoming .path-week-expander{font-size:0;gap:0;padding-top:3px}
+.path-upcoming .path-week-expander svg{width:14px;height:14px}
+.path-upcoming .path-preview-day{display:block;padding:12px 0}
+.path-upcoming .path-preview-date{display:block;width:auto;font-size:11px;margin-bottom:4px}
+.path-upcoming .path-preview-day strong{font-size:12px}
+.path-upcoming .path-preview-day p,.path-upcoming .path-preview-tasks{font-size:11px;line-height:1.6}
+.path-upcoming .path-finish{min-height:76px;padding-top:18px;padding-bottom:6px}
+.path-upcoming .path-line-node-finish{width:24px;height:24px;left:-7px;top:23px}
+.path-upcoming .path-line-node-finish svg{width:20px;height:20px}
+.path-upcoming .path-finish>div{display:block}
+.path-upcoming .path-finish strong{font-size:13px}
+.path-upcoming .path-finish>div>span{display:block;margin-top:4px;font-size:12px}
+.path-upcoming .path-setup{display:block;padding:0;margin:8px 0 0;background:none;border:0}
+.path-upcoming .path-setup p{font-size:12px;line-height:1.65}
+.path-upcoming .path-setup strong{display:none}
+.path-upcoming .path-setup button{margin-top:14px}
+.compact-shell .path-current>.path-library{margin:18px 0 0}
+.compact-shell .footer-note{margin-top:28px}
+.compact-shell .results-entry,.compact-shell .results-gate{max-width:960px;margin-left:auto;margin-right:auto}
+body.focus-mode .compact-shell .app-header{display:none}
+body.focus-mode .compact-shell .workspace{margin:0 auto;max-width:1120px}
+@media(min-width:1600px){.compact-shell .workspace{max-width:1320px}.compact-shell .app-header{padding-left:max(28px,calc((100vw - 1264px)/2));padding-right:max(28px,calc((100vw - 1264px)/2))}.path-workspace{grid-template-columns:minmax(0,1fr) 320px;gap:32px}}
+@media(max-width:900px){.path-workspace{grid-template-columns:minmax(0,1fr);gap:20px}.path-upcoming{padding:18px 22px}.path-upcoming .path-preview-day{display:flex;gap:14px}.path-upcoming .path-preview-date{width:75px;flex:0 0 75px}.compact-shell .app-header{gap:20px;padding:14px 24px}.compact-shell .nav-link{padding:10px 12px}.compact-shell .workspace{margin:0 auto;width:100%;padding:20px 24px 92px}}
+@media(max-width:600px){.compact-shell .app-header{flex-wrap:wrap;gap:12px;padding:14px 16px 9px}.compact-shell .brand small{display:none}.compact-shell .app-header nav{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.compact-shell .nav-link{padding:10px 6px;font-size:12px;gap:6px;min-width:0}.compact-shell .nav-link svg{width:16px;height:16px;flex-shrink:0}.compact-shell .workspace{padding:16px 16px 100px;margin:0;width:100%}.compact-shell .topbar{margin-bottom:18px;gap:10px;flex-wrap:wrap}.compact-shell .top-actions{gap:8px;flex-wrap:wrap}.compact-shell .path-page-heading{display:block;margin-bottom:20px}.compact-shell .path-page-heading h1{font-size:27px}.compact-shell .path-goal{justify-content:flex-start;max-width:none;margin-top:12px}.compact-shell .path-today-header{padding:20px 18px 13px}.compact-shell .path-today-header h2{font-size:21px}.compact-shell .path-task-list{padding:0 8px}.compact-shell .path-task>button,.compact-shell .path-task-static{padding:14px 10px;gap:10px}.compact-shell .path-task-symbol{width:30px;height:30px;flex-basis:30px;border-radius:8px}.compact-shell .path-today-footer{padding:16px 18px 20px}.compact-shell .path-today-footer p{max-width:100%}.path-upcoming{padding:16px 18px}.compact-shell .results-basis{margin-bottom:20px}.compact-shell .path-task-topline{gap:4px 8px}}
+@media print{.compact-shell .app-header{display:none}.compact-shell .workspace{margin:0;padding:0;width:100%;max-width:none}.path-workspace{display:block}.path-upcoming{margin-top:20px;break-inside:avoid}}
+/* Home already identifies itself in the selected navigation tab. */
+.compact-shell.view-home .topbar{display:none}
+.compact-shell.view-home .workspace{padding-top:26px}

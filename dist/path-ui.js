@@ -63,13 +63,14 @@ export function homePathMarkup(model = {}) {
   const note = model.continueNote || (tasks.length && tasks.every(task => stateOf(task.state ?? task.status) === 'done') ? 'Today’s steps are complete. Come back for your next study day.' : '');
   return `<div class="path-home"><header class="path-page-heading"><div><h1>${dated ? 'Your path to test day' : 'Your study path'}</h1>${model.sectionLabel ? `<p>${esc(model.sectionLabel)}</p>` : ''}</div>${model.goalLabel || model.testDateLabel ? `<div class="path-goal">${model.goalLabel ? `<span>${esc(model.goalLabel)}</span>` : ''}${model.testDateLabel ? `<span>SAT ${esc(model.testDateLabel)}</span>` : ''}${button('Edit', 'path-setup')}</div>` : ''}</header>
     ${resumeMarkup(model.resume)}
-    <ol class="study-path" aria-label="Your study path"><li class="path-today-stop"><span class="path-line-node path-line-node-today" aria-hidden="true"></span><section class="path-today" aria-labelledby="path-today-title"><header class="path-today-header"><div class="path-today-date"><span>Today</span>${today.dateLabel ? `<span>${esc(today.dateLabel)}</span>` : ''}</div><h2 id="path-today-title">${esc(today.title || 'A little progress, one step at a time')}</h2>${today.description ? `<p>${esc(today.description)}</p>` : ''}</header>
+    <div class="path-workspace"><div class="path-current"><ol class="study-path path-current-day" aria-label="Today’s study path"><li class="path-today-stop"><span class="path-line-node path-line-node-today" aria-hidden="true"></span><section class="path-today" aria-labelledby="path-today-title"><header class="path-today-header"><div class="path-today-date"><span>Today</span>${today.dateLabel ? `<span>${esc(today.dateLabel)}</span>` : ''}</div><h2 id="path-today-title">${esc(today.title || 'A little progress, one step at a time')}</h2>${today.description ? `<p>${esc(today.description)}</p>` : ''}</header>
     ${tasks.length ? `<ol class="path-task-list" aria-label="Today’s recommendations">${tasks.slice(0,3).map((task,index) => taskRow(task,index)).join('')}</ol>` : `<p class="path-empty">${esc(today.emptyMessage || 'Choose a lesson in Practice, or set your routine to get a daily recommendation.')}</p>`}
     <footer class="path-today-footer">${note ? `<p>${esc(note)}</p>` : '<span></span>'}${canContinue ? button(model.continueLabel || 'Continue', 'path-continue', 'primary path-continue') : ''}</footer></section></li>
-    ${dated ? list(model.weeks).map(weekMarkup).join('') : ''}
-    ${dated ? `<li class="path-finish"><span class="path-line-node path-line-node-finish" aria-hidden="true">${icon('flag')}</span><div><strong>Your SAT</strong><span>${esc(model.testDateLabel)}</span></div></li>` : ''}</ol>
-    ${libraryMarkup(model.library, true)}
+    </ol>${tasks.some(task => task.kind === 'bank-setup') ? '' : libraryMarkup(model.library, true)}</div>
+    <aside class="path-upcoming" aria-label="Upcoming study"><h2>${dated ? 'Your roadmap' : 'Your routine'}</h2>${dated ? `<p class="path-upcoming-intro">A look at what’s ahead. Your path adapts as you practice.</p><ol class="study-path" aria-label="Upcoming study path">${list(model.weeks).map(weekMarkup).join('')}` : ''}
+    ${dated ? `<li class="path-finish"><span class="path-line-node path-line-node-finish" aria-hidden="true">${icon('flag')}</span><div><strong>Your SAT</strong><span>${esc(model.testDateLabel)}</span></div></li>` : ''}${dated ? '</ol>' : ''}
     ${!dated ? `<aside class="path-setup"><div><strong>Set up your routine</strong><p>Add your test date and study days to see the path ahead.</p></div>${button('Set up routine', 'path-setup', 'secondary')}</aside>` : ''}
+    </aside></div>
   </div>`;
 }
 
