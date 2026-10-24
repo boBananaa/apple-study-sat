@@ -2,7 +2,7 @@ import {createResultsUI} from './results-ui.js?v=10';
 import {desktopSettings,isDesktop} from './desktop.js?v=10';
 import {LESSONS} from './learning-content.js?v=10';
 import {buildHomePath,selectHomeTaskQuestions,bindHomeTask} from './path-logic.js?v=10';
-import {homePathMarkup,practiceHubMarkup} from './path-ui.js?v=10';
+import {homePathMarkup,practiceHubMarkup} from './path-ui.js?v=11';
 import {localDate,addDays,validDate,normalizeRoutine} from './planner.js?v=10';
 import {examTaken,reviewQueue} from './studio-logic.js?v=10';
 
